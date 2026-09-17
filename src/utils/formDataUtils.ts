@@ -1,0 +1,425 @@
+import { isEmail, isAlphanumeric, isLength } from "validator";
+import ilsLibraryList from "../data/ilsLibraryList";
+import * as config from "../../appConfig";
+import {
+  Address,
+  Addresses,
+  ProblemDetail,
+  FormAPISubmission,
+  FormInputData,
+} from "../interfaces";
+import { type ErrorCode, ErrorCodes } from "../errors";
+import { ipLocationMessageTranslations } from "../data/ipLocationMessageTranslations";
+import { every, isEmpty } from "lodash";
+import moment from "moment";
+import stateData from "../data/stateAbbreviations";
+
+const errorMessages = (t: (key: string) => string) => ({
+  firstName: t("personal.errorMessage.firstName"),
+  lastName: t("personal.errorMessage.lastName"),
+  birthdate: t("personal.errorMessage.birthdate"),
+  ageGate: t("personal.errorMessage.ageGate"),
+  email: t("personal.errorMessage.email"),
+  username: t("account.errorMessage.username"),
+  password: t("account.errorMessage.password"),
+  verifyPassword: t("account.errorMessage.verifyPassword"),
+  homeLibraryCode: t("account.errorMessage.homeLibraryCode"),
+  acceptTerms: t("account.errorMessage.acceptTerms"),
+  address: {
+    line1: t("location.errorMessage.line1"),
+    city: t("location.errorMessage.city"),
+    state: t("location.errorMessage.state"),
+    zip: t("location.errorMessage.zip"),
+  } as Address,
+});
+
+/**
+ * isDate
+ * Makes sure that the input value matches the desired path and is a date with
+ * the year bounds.
+ */
+function isDate(input, minYear = 1902): boolean {
+  if (typeof input !== "string" || input === "") {
+    return false;
+  }
+
+  const date = moment(input, "MM/DD/YYYY", true);
+  const tomorrow = moment().add(1, "day");
+
+  // A valid date must be in the past and the year must be after the minYear.
+  return date.isValid() && date.isBefore(tomorrow) && date.year() > minYear;
+}
+
+/**
+ * findLibraryCode
+ * Find the code for a library by searching for its name in the `ilsLibraryList`
+ * array.
+ * @param libraryName Name of library to find in the list.
+ */
+function findLibraryCode(libraryName: string): string | undefined {
+  const library = ilsLibraryList.find(
+    (library) => library.label === libraryName
+  );
+  return library?.value;
+}
+
+/**
+ * findLibraryName
+ * Find the name for a library by searching for its code in the `ilsLibraryList`
+ * array.
+ * @param libraryCode Name of library to find in the list.
+ */
+function findLibraryName(libraryCode: string): string | undefined {
+  const library = ilsLibraryList.find(
+    (library) => library.value === libraryCode
+  );
+  return library?.label;
+}
+
+/**
+ * findState
+ * Find the 2-letter code for state by searching for its code in the `stateData`
+ * array.
+ * @param usState Name of library to find in the list.
+ */
+function findState(usState: string): string | undefined {
+  const state = stateData.find((state) => state.label === usState);
+  return state?.label;
+}
+
+/**
+ * getPatronAgencyType
+ * Returns the agency type based on the patron's location
+ * from the query param.
+ */
+const getPatronAgencyType = (agencyTypeParam?) => {
+  const { agencyType } = config;
+  return !isEmpty(agencyTypeParam) && agencyTypeParam.toLowerCase() === "nys"
+    ? agencyType.nys
+    : agencyType.default;
+};
+
+export type SupportedLang =
+  | "ar"
+  | "bn"
+  | "en"
+  | "es"
+  | "fr"
+  | "ht"
+  | "ko"
+  | "pl"
+  | "ru"
+  | "ur"
+  | "zhcn";
+export type SupportedLoc = "nyc" | "nys" | "us";
+/**
+ * getLocationValue
+ * Map the location value from the form field into the string value.
+ */
+const getLocationValue = (
+  location: SupportedLoc = "us",
+  lang: SupportedLang = "en"
+): string => {
+  return ipLocationMessageTranslations[lang][location];
+};
+
+/**
+ * constructAddressType
+ * Address form fields have "home-" or "work-" as prefixes in their name
+ * attribute, such as "home-line1" or "home-city". We need to remove the prefix
+ * and create an object for address type that was passed.
+ */
+const constructAddressType = (object = {}, type: string): Address => {
+  const address = {} as Address;
+  Object.keys(object).forEach((key) => {
+    if (key.indexOf(`${type}-`) !== -1) {
+      // Remove the addresses field prefix and add to the proper object.
+      const field = key.split("-")[1];
+      address[field] = object[key] as string;
+    }
+  });
+  return address;
+};
+
+/**
+ * constructAddresses
+ * From a single object that has address data prefixed with "home-" or "work-",
+ * create an Addresses object.
+ * @param object FormData object from the client's form submission.
+ */
+const constructAddresses = (object = {}): Addresses => {
+  const addresses = {
+    home: constructAddressType(object, "home"),
+    work: constructAddressType(object, "work"),
+  } as Addresses;
+
+  // The work object is optional, so if it's completely empty, just remove it
+  // or else we'll get false errors of work fields being empty.
+  if (every(addresses.work, isEmpty)) {
+    delete addresses.work;
+  }
+
+  return addresses;
+};
+
+/**
+ * constructProblemDetail
+ * Create an error object to be returned by the API endpoints.
+ */
+const constructProblemDetail = (
+  status = 400,
+  type: ErrorCode = ErrorCodes.INTERNAL_SERVER_ERROR,
+  title = "General Error",
+  detail = "There was an error with your request",
+  error: { [key: string]: string } = null
+): ProblemDetail => {
+  const pd: ProblemDetail = {
+    status,
+    type,
+    title,
+    detail,
+  };
+  if (error) {
+    pd.error = error;
+  }
+  return pd;
+};
+
+/**
+ * validateAddressFormData
+ * This validates fields in an address object, adds any errors to the object
+ * containing any existing errors from other fields, and returns it. The
+ * validation is perform on the home and work address, if available. Since the
+ * work address is optional, having an empty work address is acceptable.
+ */
+const validateAddressFormData = (
+  initErrorObj: object,
+  addresses: Addresses,
+  t: (key: string) => string
+) => {
+  const messages = errorMessages(t);
+  let errorObj = { ...initErrorObj };
+  // Keep track of the home or work address errors in this larger object.
+  const addressErrors = {} as { [key in keyof Addresses]?: Address };
+
+  Object.keys(addresses).forEach((addressType: keyof Addresses = "home") => {
+    // `addressType` can be either "home" or "work".
+    const typeObj = addresses[addressType];
+    // Now validate each field for that specific address object:
+    if (isEmpty(typeObj.line1)) {
+      addressErrors[addressType] = {
+        ...addressErrors[addressType],
+        line1: messages.address.line1,
+      };
+    } else if (typeObj?.line1?.length + typeObj?.line2?.length > 100) {
+      addressErrors[addressType] = {
+        ...addressErrors[addressType],
+        line1: "Street address fields must not be more than 100 lines.",
+      };
+    }
+
+    if (isEmpty(typeObj.city)) {
+      addressErrors[addressType] = {
+        ...addressErrors[addressType],
+        city: messages.address.city,
+      };
+    }
+
+    if (isEmpty(typeObj.state) || typeObj.state.length !== 2) {
+      addressErrors[addressType] = {
+        ...addressErrors[addressType],
+        state: messages.address.state,
+      };
+    }
+
+    if (isEmpty(typeObj.zip) || !isLength(typeObj.zip, { min: 5, max: 10 })) {
+      addressErrors[addressType] = {
+        ...addressErrors[addressType],
+        zip: messages.address.zip,
+      };
+    }
+  });
+
+  // Now add it back to the original error object as the separate
+  // `address` property.
+  if (!isEmpty(addressErrors)) {
+    errorObj = { ...errorObj, address: addressErrors };
+  }
+
+  return errorObj;
+};
+
+/**
+ * validatePersonalFormData
+ * * Validates the firstName, lastName, birthdate, ageGate, and email fields.
+ */
+const validatePersonalFormData = (
+  initErrorObj: object,
+  data: FormInputData,
+  t: (key: string) => string
+) => {
+  const messages = errorMessages(t);
+  let errorObj = { ...initErrorObj };
+  const { firstName, lastName, birthdate, email } = data;
+
+  if (isEmpty(firstName)) {
+    errorObj = { ...errorObj, firstName: messages.firstName };
+  }
+  if (isEmpty(lastName)) {
+    errorObj = { ...errorObj, lastName: messages.lastName };
+  }
+  const DATE_MAX_LENGTH = 10;
+  if (
+    isEmpty(birthdate) ||
+    (birthdate.length <= DATE_MAX_LENGTH && !isDate(birthdate))
+  ) {
+    errorObj = {
+      ...errorObj,
+      birthdate: messages.birthdate,
+    };
+  }
+  if (isEmpty(email) || !isEmail(email)) {
+    errorObj = { ...errorObj, email: messages.email };
+  }
+
+  return errorObj;
+};
+
+/**
+ * validateAccountFormData
+ * Validates the username, password, verifyPassword, and acceptTerms fields.
+ */
+const validateAccountFormData = (
+  initErrorObj: object,
+  data: FormInputData,
+  t: (key: string) => string
+) => {
+  const messages = errorMessages(t);
+  let errorObj = { ...initErrorObj };
+  const { username, password, verifyPassword, acceptTerms, homeLibraryCode } =
+    data;
+
+  if (
+    isEmpty(username) ||
+    !isAlphanumeric(username) ||
+    !isLength(username, { min: 5, max: 25 })
+  ) {
+    errorObj = {
+      ...errorObj,
+      username: messages.username,
+    };
+  }
+
+  if (isEmpty(password) || !isLength(password, { min: 8, max: 32 })) {
+    errorObj = { ...errorObj, password: messages.password };
+  }
+
+  if (isEmpty(verifyPassword) || password !== verifyPassword) {
+    errorObj = { ...errorObj, verifyPassword: messages.verifyPassword };
+  }
+
+  if (isEmpty(homeLibraryCode) || !findLibraryName(homeLibraryCode)) {
+    errorObj = { ...errorObj, homeLibraryCode: messages.homeLibraryCode };
+  }
+
+  if (!acceptTerms) {
+    errorObj = { ...errorObj, acceptTerms: messages.acceptTerms };
+  }
+
+  return errorObj;
+};
+
+/**
+ * validateFormData
+ * Validates the form submission values and returns any errors. Internally, it
+ * uses other functions to validate groups of data separately, to make it
+ * easier to validate data on a per page basis if it needs to, and then all at
+ * once here.
+ */
+const validateFormData = (
+  data: FormInputData,
+  addresses: Addresses,
+  t: (key: string) => string
+) => {
+  let errorObj = validatePersonalFormData({}, data, t);
+  errorObj = validateAddressFormData(errorObj, addresses, t);
+  errorObj = validateAccountFormData(errorObj, data, t);
+
+  return errorObj;
+};
+
+/**
+ * constructPatronObject
+ * Creates an object that can be sent to the Card Creator API. Returns an error
+ * object if any fields don't pass their validation requirements.
+ */
+const constructPatronObject = (
+  object: FormInputData,
+  t: (key: string) => string
+): FormAPISubmission | ProblemDetail => {
+  const {
+    firstName,
+    lastName,
+    email,
+    birthdate,
+    preferredLanguage,
+    ageGate,
+    ecommunicationsPref,
+    agencyType,
+    policyType,
+    username,
+    password,
+    homeLibraryCode,
+    acceptTerms,
+    location,
+  } = object;
+
+  const addresses: Addresses = constructAddresses(object);
+  const errors = validateFormData(object, addresses, t);
+
+  if (!isEmpty(errors)) {
+    return constructProblemDetail(
+      400,
+      ErrorCodes.INVALID_REQUEST,
+      "Invalid Request",
+      "There was an error with the submitted form values.",
+      errors
+    );
+  }
+
+  return {
+    firstName: firstName.trim(),
+    lastName: lastName.trim(),
+    email,
+    birthdate,
+    ageGate,
+    preferredLanguage,
+    address: addresses.home,
+    workAddress: !isEmpty(addresses.work) ? addresses.work : null,
+    username,
+    password,
+    ecommunicationsPref,
+    agencyType: agencyType || config.agencyType.default,
+    policyType: policyType || "simplye",
+    homeLibraryCode,
+    acceptTerms,
+    location,
+  };
+};
+
+export {
+  errorMessages,
+  isDate,
+  findLibraryCode,
+  findLibraryName,
+  findState,
+  getPatronAgencyType,
+  getLocationValue,
+  constructAddresses,
+  constructAddressType,
+  constructPatronObject,
+  validateFormData,
+  validatePersonalFormData,
+  validateAddressFormData,
+  validateAccountFormData,
+};

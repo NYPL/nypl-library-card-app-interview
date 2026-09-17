@@ -1,0 +1,219 @@
+import {
+  Box,
+  Button,
+  ButtonGroup,
+  Center,
+  FormField as DSFormField,
+  FormRow,
+  TextInputRefType,
+} from "@nypl/design-system-react-components";
+import axios from "axios";
+import { useTranslation } from "next-i18next";
+import { useRouter } from "next/router";
+import React, { useState, useEffect, useRef } from "react";
+import { useFormContext } from "react-hook-form";
+import { isValidUsername } from "../../utils/utils";
+
+import FormField from "../FormField";
+import SmallLoadingIndicator from "../SmallLoadingIndicator";
+import useFormDataContext from "../../context/FormDataContext";
+
+import {
+  apiErrorTranslations,
+  commonAPIErrors,
+} from "../../data/apiErrorMessageTranslations";
+import { apiTranslations } from "../../data/apiMessageTranslations";
+import { NRError } from "../../logger/newrelic";
+import { useMergedRef } from "../../hooks/useMergedRef";
+
+interface UsernameValidationFormProps {
+  id?: string;
+  csrfToken: string;
+  firstFieldRef?: React.RefObject<TextInputRefType>;
+  usernameRegisterRef: any;
+  usernameRegisterProps: any;
+}
+
+/**
+ * UsernameValidationForm
+ * Renders the input field for the username value. It also renders a button for
+ * optional request to check if the username is available.
+ */
+const UsernameValidationForm = ({
+  id = "",
+  csrfToken,
+  firstFieldRef,
+  usernameRegisterRef,
+  usernameRegisterProps,
+}: UsernameValidationFormProps) => {
+  const { t } = useTranslation("common");
+  const {
+    query: { lang = "en" },
+  } = useRouter();
+  const defaultState = {
+    available: false,
+    message: "",
+  };
+  const [isLoading, setIsLoading] = useState(false);
+  const usernameInputRef = useRef<TextInputRefType>(null);
+  const mergedRef = useMergedRef(
+    usernameRegisterRef,
+    firstFieldRef,
+    usernameInputRef
+  );
+  const [usernameIsAvailable, setUsernameIsAvailable] = useState(defaultState);
+  const {
+    watch,
+    getValues,
+    formState: { errors },
+  } = useFormContext();
+  const usernameWatch = watch("username");
+  const { state } = useFormDataContext();
+  const { formValues } = state;
+
+  // Whenever the username input changes, revert back to the default state.
+  // This is to re-render the button after a patron tries a new username.
+  useEffect(() => {
+    setUsernameIsAvailable(defaultState);
+  }, [usernameWatch]);
+
+  /**
+   * validateUsername
+   * Call the API to validate the username and either get an available username
+   * response or an error response that the username is unavailable or invalid.
+   */
+  const validateUsername = (e) => {
+    e.preventDefault();
+    setIsLoading(true);
+    const username = getValues("username");
+    axios
+      .post("/library-card/api/username", { username, csrfToken })
+      .then((response) => {
+        let message = response.data?.message;
+        // Translate the message if possible.
+        if (lang !== "en") {
+          message = apiTranslations[message][lang] || message;
+        }
+        setUsernameIsAvailable({
+          available: true,
+          message,
+        });
+      })
+      .catch((error) => {
+        let message = error.response?.data?.message;
+        // Catch any CSRF token issues and return a generic error message.
+        if (error.response?.status === 403) {
+          message = commonAPIErrors.errorValidatingToken;
+        }
+        // If there's no response (network failure) or a server error, return a generic message.
+        if (!error.response || error.response?.status >= 500) {
+          message = commonAPIErrors.errorValidatingUsername;
+        }
+
+        // Translate the message if possible.
+        if (lang !== "en") {
+          message = apiErrorTranslations[message]?.[lang] || message;
+        }
+
+        NRError(
+          new Error(`Error Validate Username. ${JSON.stringify(error)}`),
+          {
+            customAttributes: {
+              contactForm: `Error Validate Username. ${JSON.stringify(error)}`,
+            },
+          }
+        );
+
+        setUsernameIsAvailable({
+          available: false,
+          message,
+        });
+      })
+      .finally(() => {
+        setIsLoading(false);
+        usernameInputRef.current?.focus();
+      });
+  };
+  /**
+   * renderButton
+   * Render the button to validate a username and enable it only if
+   * the input is valid and if the input has been updated after it
+   * was checked for availability.
+   */
+  const renderButton = () => {
+    const username = getValues("username");
+    const canValidate =
+      isValidUsername(username) && !usernameIsAvailable.message;
+    return (
+      <ButtonGroup>
+        <Button
+          id="username-check-button"
+          isDisabled={isLoading || !canValidate}
+          aria-busy={isLoading}
+          onClick={validateUsername}
+          type="button"
+          backgroundColor={isLoading ? "#99C3E5!" : undefined}
+          position="relative"
+        >
+          {isLoading && (
+            <Center position="absolute" inset={0} aria-hidden="true">
+              <SmallLoadingIndicator isLoading={isLoading} />
+            </Center>
+          )}
+          <Box visibility={isLoading ? "hidden" : "visible"}>
+            {t("account.username.checkButton")}
+          </Box>
+        </Button>
+      </ButtonGroup>
+    );
+  };
+
+  return (
+    <>
+      <FormRow id={`${id}-username-1`}>
+        <DSFormField>
+          <FormField
+            id="username"
+            label={t("account.username.label")}
+            {...usernameRegisterProps}
+            instructionText={t("account.username.instruction")}
+            isRequired
+            errorState={errors}
+            maxLength={25}
+            defaultValue={formValues.username}
+            autoComplete="username"
+            ref={mergedRef}
+          />
+        </DSFormField>
+      </FormRow>
+
+      <FormRow id={`${id}-username-2`}>
+        <DSFormField>{renderButton()}</DSFormField>
+      </FormRow>
+
+      <FormRow
+        id={`${id}-username-3`}
+        display={usernameIsAvailable?.message ? "block" : "contents"}
+      >
+        <DSFormField
+          aria-live="assertive"
+          display={usernameIsAvailable?.message ? "block" : "contents"}
+        >
+          {usernameIsAvailable?.message ? (
+            <Box
+              color={
+                usernameIsAvailable.available
+                  ? "var(--nypl-colors-ui-success-primary)"
+                  : "var(--nypl-colors-ui-error-primary)"
+              }
+            >
+              {usernameIsAvailable.message}
+            </Box>
+          ) : null}
+        </DSFormField>
+      </FormRow>
+    </>
+  );
+};
+
+export default UsernameValidationForm;

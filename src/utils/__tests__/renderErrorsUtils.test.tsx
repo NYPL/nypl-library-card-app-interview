@@ -1,0 +1,134 @@
+import React from "react";
+import {
+  createAnchorText,
+  createUsernameAnchor,
+  renderErrorElements,
+} from "../renderErrorsUtils";
+import { errorMessages } from "../formDataUtils";
+import translations from "../../../public/locales/en/common.json";
+
+const t = (key: string) => {
+  const keys = key.split(".");
+  let result: any = translations;
+  for (const k of keys) {
+    result = result?.[k];
+  }
+  return result ?? key;
+};
+
+const messages = errorMessages(t);
+
+describe("createAnchorText", () => {
+  const errors = {
+    firstName: messages.firstName,
+    password: messages.password,
+    acceptTerms: messages.acceptTerms,
+    username: messages.username,
+    line1: messages.address.line1,
+    state: messages.address.state,
+  };
+
+  test("it should return undefined if the key does not exist in the list of properties", () => {
+    const badKeys = {
+      fullName: "fullName",
+      streetAddress: "streetAddress",
+    };
+
+    expect(createAnchorText(badKeys.fullName, errors)).toEqual(undefined);
+    expect(createAnchorText(badKeys.streetAddress, errors)).toEqual(undefined);
+  });
+
+  test("it should replace text in the error message with its equivalent anchor element string", () => {
+    expect(messages.firstName).toEqual(
+      "There was a problem. Please enter a valid first name."
+    );
+    expect(messages.acceptTerms).toEqual(
+      "There was a problem. The Terms and Conditions must be checked."
+    );
+
+    expect(createAnchorText("firstName", errors)).toEqual(
+      'There was a problem. Please enter a valid <a href="#input-firstName">first name</a>.'
+    );
+    expect(createAnchorText("acceptTerms", errors)).toEqual(
+      'There was a problem. The <a href="#input-acceptTerms">Terms and Conditions</a> must be checked.'
+    );
+  });
+
+  test("it should return whether the error is for a home or work address field", () => {
+    const home = createAnchorText("line1", errors, "home");
+    const work = createAnchorText("line1", errors, "work");
+    expect(home).toEqual(
+      'There was a problem. Please enter a valid home <a href="#address-section">street address</a>.'
+    );
+    expect(work).toEqual(
+      'There was a problem. Please enter a valid work <a href="#address-section">street address</a>.'
+    );
+  });
+
+  test("it should return the same hash href for all address related errors", () => {
+    expect(createAnchorText("line1", errors, "home")).toEqual(
+      'There was a problem. Please enter a valid home <a href="#address-section">street address</a>.'
+    );
+    expect(createAnchorText("state", errors, "work")).toEqual(
+      'There was a problem. Please enter a 2-character work <a href="#address-section">state</a> abbreviation.'
+    );
+  });
+});
+
+describe("createUsernameAnchor", () => {
+  test("returns the same string if username is not in the string", () => {
+    expect(createUsernameAnchor("some string")).toEqual("some string");
+  });
+
+  test("returns a string with an anchor element around username", () => {
+    expect(createUsernameAnchor("some error with the username")).toEqual(
+      'some error with the <a href="#input-username">username</a>'
+    );
+  });
+});
+
+describe("renderErrorElements", () => {
+  test("it should return an empty array if there are no errors", () => {
+    expect(renderErrorElements({})).toEqual([]);
+  });
+
+  test("it should return a list of li elements for every error", () => {
+    const errors = {
+      firstName: messages.firstName,
+      password: messages.password,
+      address: {
+        home: {
+          state: messages.address.state,
+        },
+      },
+    };
+
+    const liList = renderErrorElements(errors);
+
+    expect(JSON.stringify(liList)).toEqual(
+      JSON.stringify([
+        <li
+          key="firstName"
+          dangerouslySetInnerHTML={{
+            __html:
+              'There was a problem. Please enter a valid <a href="#input-firstName">first name</a>.',
+          }}
+        />,
+        <li
+          key="password"
+          dangerouslySetInnerHTML={{
+            __html:
+              'There was a problem. Your <a href="#input-password">password</a> must be between 8 and 32 characters using upper or lower case characters (a-z, A-Z), numbers (0-9), and/or special characters limited to the following: . ~ ! ? @ # $ % ^ &amp; * ( ) <span>Passwords must not contain common patterns, for example: a character that is repeated three or more times (aaaatf54), or repeating a pattern (abcabcabc).</span>',
+          }}
+        />,
+        <li
+          key="home-state"
+          dangerouslySetInnerHTML={{
+            __html:
+              'There was a problem. Please enter a 2-character home <a href="#address-section">state</a> abbreviation.',
+          }}
+        />,
+      ])
+    );
+  });
+});

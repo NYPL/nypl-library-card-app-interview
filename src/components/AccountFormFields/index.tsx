@@ -1,0 +1,161 @@
+import {
+  Checkbox,
+  FormRow,
+  FormField as DSFormField,
+  HorizontalRule,
+  TextInputRefType,
+} from "@nypl/design-system-react-components";
+import { useTranslation } from "next-i18next";
+import React, { useState, useEffect } from "react";
+import { useFormContext } from "react-hook-form";
+import FormField from "../FormField";
+import { isValidUsername, isValidPinPattern } from "../../utils/utils";
+import UsernameValidationFormFields from "../UsernameValidationFormFields";
+import useFormDataContext from "../../context/FormDataContext";
+import ilsLibraryList from "../../data/ilsLibraryList";
+import LibraryListFormFields from "../LibraryListFormFields";
+
+interface AccountFormFieldsProps {
+  id?: string;
+  showPasswordOnLoad?: boolean;
+  csrfToken: string;
+  firstFieldRef?: React.RefObject<TextInputRefType>;
+}
+
+function AccountFormFields({
+  id,
+  showPasswordOnLoad,
+  csrfToken,
+  firstFieldRef,
+}: AccountFormFieldsProps) {
+  const { t } = useTranslation("common");
+  const {
+    formState: { errors },
+    getValues,
+    register,
+  } = useFormContext();
+  const { state } = useFormDataContext();
+  const [showPassword, setShowPassword] = useState(true);
+  const [clientSide, setClientSide] = useState(false);
+  const { formValues } = state;
+
+  // When the component loads, if we want to show the password by default,
+  // show it.
+  useEffect(() => {
+    if (showPasswordOnLoad) {
+      setShowPassword(true);
+    }
+  }, []);
+  const minPasswordLength = 8;
+  const maxPasswordLength = 32;
+  const update = () => setShowPassword(() => !showPassword);
+  const passwordType = showPassword ? "text" : "password";
+
+  // When the component renders on the client-side, we want to turn the password
+  // "text" input into a "password" type so that the password is visible by default.
+  // Keep track when it's rendering on the client so that the "Show password"
+  // checkbox is rendered as well - it's not needed without javascript since
+  // you can't toggle without javascript.
+  useEffect(() => {
+    setClientSide(true);
+    setShowPassword(false);
+  }, []);
+
+  const { ref: registerRef, ...usernameRegisterProps } = register("username", {
+    validate: (val) =>
+      isValidUsername(val) || t("account.errorMessage.username"),
+  });
+
+  const validatePassword = (val) => {
+    return isValidPinPattern(val) || t("account.errorMessage.password");
+  };
+
+  const verifyPasswordMatch = () => {
+    return (
+      getValues("password") === getValues("verifyPassword") ||
+      t("account.errorMessage.verifyPassword")
+    );
+  };
+
+  return (
+    <>
+      <UsernameValidationFormFields
+        id={`${id}-accountForm-1`}
+        csrfToken={csrfToken}
+        firstFieldRef={firstFieldRef}
+        usernameRegisterRef={registerRef}
+        usernameRegisterProps={usernameRegisterProps}
+      />
+
+      <FormRow id={`${id}-accountForm-2`}>
+        <DSFormField
+          sx={{
+            "#password-helperErrorText span": { my: "xs", display: "block" },
+          }}
+        >
+          <FormField
+            id="password"
+            type={passwordType}
+            label={t("account.password.label")}
+            {...register("password", {
+              validate: {
+                validatePassword,
+              },
+            })}
+            instructionText={t("account.password.instruction")}
+            isRequired
+            errorState={errors}
+            minLength={minPasswordLength}
+            maxLength={maxPasswordLength}
+            defaultValue={formValues.password}
+            autoComplete="new-password"
+          />
+        </DSFormField>
+      </FormRow>
+
+      <FormRow id={`${id}-accountForm-3`}>
+        <DSFormField>
+          <FormField
+            id="verifyPassword"
+            type={passwordType}
+            label={t("account.verifyPassword.label")}
+            {...register("verifyPassword", {
+              validate: verifyPasswordMatch,
+            })}
+            instructionText={t("account.verifyPassword.instruction")}
+            isRequired
+            errorState={errors}
+            minLength={minPasswordLength}
+            maxLength={maxPasswordLength}
+            defaultValue={formValues.verifyPassword}
+            autoComplete="new-password"
+          />
+        </DSFormField>
+      </FormRow>
+
+      <FormRow id={`${id}-accountForm-4`}>
+        <DSFormField>
+          {clientSide && (
+            <Checkbox
+              id="showPassword"
+              isChecked={showPassword}
+              labelText={t("account.showPassword")}
+              name="showPassword"
+              onChange={update}
+            />
+          )}
+        </DSFormField>
+      </FormRow>
+
+      <HorizontalRule />
+
+      <FormRow id={`${id}-accountForm-5`}>
+        <DSFormField>
+          <LibraryListFormFields libraryList={ilsLibraryList} />
+        </DSFormField>
+      </FormRow>
+    </>
+  );
+}
+
+export default AccountFormFields;

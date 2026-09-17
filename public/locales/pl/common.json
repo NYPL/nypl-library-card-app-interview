@@ -1,0 +1,199 @@
+{
+  "internationalInstructions": "W polach formularza należy używać wyłącznie liter alfabetu łacińskiego.",
+  "required": "Wymagane",
+  "banner": {
+    "title": "Uzyskaj kartę biblioteczną online"
+  },
+  "home": {
+    "title": "Wystąp o kartę biblioteczną już dziś — wystarczy kilka prostych kroków",
+    "description": {
+      "part1": "Czy mieszkasz, pracujesz, uczysz się lub płacisz podatki od nieruchomości w stanie Nowy Jork? Już teraz uzyskaj bezpłatną kartę biblioteczną, aby mieć dostęp do całej oferty Nowojorskiej Biblioteki Publicznej!",
+      "part2": "Złóż wniosek i od razu zacznij korzystać z e-booków oraz innych <a href='https://www.nypl.org/help/services/remote-resources'>materiałów cyfrowych</a>. Następnie <a href='https://www.nypl.org/locations'>odwiedź dowolną placówkę NYPL</a>, aby zweryfikować swoje dane i uzyskać fizyczną kartę NYPL. Taka karta daje dostęp do jeszcze większej puli zasobów Biblioteki, w tym książek drukowanych i programu Karta Kulturalna.",
+      "part3": "Jeżeli odwiedzasz Nowy Jork jako mieszkaniec innego stanu, możesz wystąpić przy użyciu tego formularza o kartę tymczasową. Przed przyjazdem możesz zarezerwować materiały fizyczne i wizyty badawcze. Aby korzystać z dodatkowych usług Biblioteki, trzeba osobiście zweryfikować swoją kartę w placówce NYPL w ciągu 30 dni.",
+      "part4": "Jeżeli przyjeżdżasz z innego kraju, użyj <a href='https://www.nypl.org/help/library-card#international-researchers'>specjalnego formularza</a> dla gości zagranicznych. Przy użyciu karty tymczasowej możesz zarezerwować materiały fizyczne i wizyty badawcze.",
+      "part5": "<a href=whttps://www.nypl.org/library-card'>Dowiedz się więcej</a> o tym, do czego daje dostęp karta biblioteczna.",
+      "part6": "Składając wniosek, oświadczasz, że rozumiesz i akceptujesz <a href='https://nypl.org/help/library-card/terms-conditions' >Regulamin dla posiadaczy kart</a> oraz <a href='https://www.nypl.org/help/about-nypl/legal-notices/policies-and-rules/pl'>Zasady i przepisy</a>. Więcej informacji o tym, jak Biblioteka korzysta z&#xa0;danych osobowych, zawiera <a href='https://www.nypl.org/help/about-nypl/legal-notices/privacy-policy/pl'>Polityka prywatności</a>"
+    },
+    "banner": {
+      "text": "Uwaga: aby złożyć wniosek online, musisz mieć co najmniej 13 lat. Aby uzyskać cyfrową kartę biblioteczną i natychmiastowy dostęp do zasobów online, musisz przebywać w stanie Nowy Jork podczas składania wniosku."
+    }
+  },
+  "personal": {
+    "title": "Krok 1 z 5: dane osobowe",
+    "firstName": {
+      "label": "Imię"
+    },
+    "lastName": {
+      "label": "Nazwisko"
+    },
+    "birthdate": {
+      "label": "Data urodzenia",
+      "instruction": "MM/DD/RRRR, z ukośnikami"
+    },
+    "ageGate": "Yes, I am over 13 years old.",
+    "email": {
+      "label": "Adres e-mail",
+      "instruction": "Adres e-mail jest niezbędny, aby móc korzystać z wielu naszych zasobów cyfrowych, takich jak e-booki."
+    },
+    "eCommunications": {
+      "labelText": "Tak, chcę otrzymywać informacje o programach i usługach NYPL. "
+    },
+    "errorMessage": {
+      "firstName": "Wystąpił problem. Wprowadź prawidłowe imię.",
+      "lastName": "Wystąpił problem. Wprowadź prawidłowe nazwisko.",
+      "birthdate": "Wystąpił problem. Wprowadź prawidłową datę w formacie MM/DD/RRRR, z ukośnikami.",
+      "ageGate": "Wystąpił problem. aby złożyć wniosek online, musisz mieć co najmniej 13 lat.",
+      "email": "Wystąpił problem. Wprowadź prawidłowy adres e-mail."
+    }
+  },
+  "location": {
+    "title": "Krok 2 z 5: adres",
+    "address": {
+      "title": "Adres zamieszkania",
+      "description": "Jeżeli mieszkasz w Stanach Zjednoczonych, podaj swój adres poniżej. Jeżeli odwiedzasz Nowy Jork jako mieszkaniec innego stanu, możesz wystąpić przy użyciu tego formularza o kartę tymczasową. Przy użyciu karty tymczasowej możesz zarezerwować materiały fizyczne i wizyty badawcze przed przyjazdem. Goście zagraniczni powinni skorzystać z naszego <a href='https://legacycatalog.nypl.org/selfreg/patonsite'>specjalnego formularza</a>.",
+      "line1": { "label": "Ulica i numer budynku" },
+      "line2": { "label": "Mieszkanie/lokal" },
+      "city": { "label": "Miejscowość" },
+      "state": { "label": "Stan", "instruction": "2-literowy skrót" },
+      "postalCode": {
+        "label": "Kod pocztowy",
+        "instruction": "5- lub 9-znakowy kod pocztowy"
+      }
+    },
+    "workAddress": {
+      "title": "Krok 2 z 5: Adres alternatywny",
+      "subtitle": "Adres alternatywny (opcjonalnie)",
+      "description": {
+        "part1": "Czy pracujesz, uczysz się lub płacisz podatki od nieruchomości w stanie Nowy Jork? Możesz się kwalifikować do uzyskania karty bibliotecznej nawet wtedy, gdy nie mieszkasz w stanie Nowy Jork.",
+        "part2": "Jeżeli pracujesz lub chodzisz do szkoły w NYC, podaj adres szkoły lub miejsca pracy:",
+        "part3": "Podaj adres miejsca, w którym pracujesz, uczysz się lub płacisz podatki od nieruchomości w stanie Nowy Jork. Jeżeli żadna z tych opcji Cię nie dotyczy, kliknij Dalej."
+      }
+    },
+    "errorMessage": {
+      "line1": "Wystąpił problem. Wprowadź prawidłową nazwę ulicy i numer budynku.",
+      "city": "Wystąpił problem. Wprowadź prawidłową miejscowość.",
+      "state": "Wystąpił problem. Wprowadź 2-literowy skrót stanu.",
+      "zip": "Wystąpił problem. Wprowadź 5- lub 9-znakowy kod pocztowy"
+    }
+  },
+  "verifyAddress": {
+    "title": "Krok 3 z 5: weryfikacja adresu",
+    "description": "Sprawdź swoje dane adresowe. Jeśli chcesz wprowadzić zmiany, kliknij „Wstecz”.",
+    "homeAddress": "Adres zamieszkania",
+    "workAddress": "Adres alternatywny",
+    "errorMessage": {
+      "select": "Wystąpił problem. Wybierz właściwy adres."
+    }
+  },
+  "account": {
+    "title": "Krok 4 z 5: dostosowanie konta",
+    "description": "Utwórz nazwę użytkownika i hasło, aby móc się logować i zarządzać kontem oraz korzystać z szerokiej gamy zasobów cyfrowych. Nazwa użytkownika powinna być unikatowa.",
+    "username": {
+      "label": "Nazwa użytkownika",
+      "instruction": "5–25 liter i cyfr. Bez znaków specjalnych.",
+      "checkButton": "Sprawdź dostępność nazwy użytkownika"
+    },
+    "password": {
+      "label": "Hasło",
+      "instruction": "Proszę utworzyć silne hasło o długości od 8 do 32 znaków, używając wielkich lub małych liter (a-z, A-Z), cyfr (0-9) i/lub znaków specjalnych ograniczonych wyłącznie do poniższych: . ~ ! ? @ # $ % ^ &amp; * ( ) <span>Hasła nie mogą zawierać popularnych schematów, na przykład: znaku powtórzonego trzy lub więcej razy (aaaatf54) lub powtarzającego się wzorca (abcabcabc). </span>"
+    },
+    "verifyPassword": {
+      "label": "Zweryfikuj hasło",
+      "instruction": "Od 8 do 32 znaków"
+    },
+    "showPassword": "Pokaż hasło",
+    "library": {
+      "selectLibrary": "Wybierz lokalną bibliotekę:",
+      "placeholder": "Wpisz nazwę biblioteki, na przykład Parkchester Library",
+      "title": "Lokalna biblioteka",
+      "description": {
+        "part1": "Jeżeli wybierzesz lokalną bibliotekę, będziemy Ci dostarczać wszystkie potrzebne materiały z oddziału o najbardziej dogodnym dla Ciebie położeniu.",
+        "part2": "Wybierz z poniższego menu rozwijanego <a href='https://www.nypl.org/locations'>placówkę NYPL</a> jako swoją bibliotekę lokalną. Jeśli nie masz biblioteki lokalnej, wybierz opcję „Virtual”. Wybór ten możesz w każdej chwili zaktualizować w ustawieniach konta.",
+        "part3": "Aby móc wypożyczyć materiały fizyczne, odwiedź placówkę NYPL w celu zweryfikowania swoich danych i uzyskania fizycznej karty NYPL."
+      }
+    },
+    "termsAndCondition": {
+      "label": "Tak, akceptuję regulamin.",
+      "text": "Składając wniosek, oświadczasz, że rozumiesz i akceptujesz <a href='https://www.nypl.org/help/library-card/terms-conditions'>Regulamin dla posiadaczy kart</a> oraz <a href='https://www.nypl.org/help/about-nypl/legal-notices/rules-and-regulations'>Zasady i przepisy</a>. Więcej informacji o tym, jak Biblioteka korzysta z danych osobowych, zawiera <a href='https://www.nypl.org/help/about-nypl/legal-notices/privacy-policy'>Polityka prywatności</a>."
+    },
+    "errorMessage": {
+      "username": "Wystąpił problem. Nazwa użytkownika musi się składać z 5–25 liter i cyfr.",
+      "password": "Wystąpił problem. Twoje hasło musi mieć od 8 do 32 znaków oraz składać się z wielkich lub małych liter (a-z, A-Z), cyfr (0-9) i/lub znaków specjalnych ograniczonych wyłącznie do poniższych: . ~ ! ? @ # $ % ^ &amp; * ( ) <span>Hasła nie mogą zawierać popularnych schematów, na przykład: znaku powtórzonego trzy lub więcej razy (aaaatf54) lub powtarzającego się wzorca (abcabcabc).</span>",
+      "verifyPassword": "Wystąpił problem. Te dwa hasła się różnią.",
+      "acceptTerms": "Wystąpił problem. Należy potwierdzić akceptację Regulaminu.",
+      "homeLibraryCode": "Wystąpił problem. Wybierz bibliotekę lokalną."
+    }
+  },
+  "review": {
+    "title": "Krok 5 z 5: potwierdzenie informacji",
+    "description": "Sprawdź poprawność wszystkich wprowadzonych informacji. W razie potrzeby możesz jeszcze wprowadzić zmiany przed przesłaniem wniosku.",
+    "section": {
+      "personal": "Dane osobowe",
+      "address": {
+        "label": "Adres",
+        "location": "Lokalizacja",
+        "home": "Zamieszkania",
+        "work": "Adres pracy"
+      },
+      "homeLibrary": "Lokalna biblioteka"
+    },
+    "createAccount": "Utwórz swoje konto",
+    "receiveNewsletter": "Otrzymuj informacje o programach i usługach NYPL",
+    "yes": "Tak",
+    "no": "Nie",
+    "nextStep": "Kiedy wyślesz wniosek, wyświetli się strona z potwierdzeniem i danymi konta. Możesz wówczas się zalogować i zamówić książki oraz inne materiały."
+  },
+  "confirmation": {
+    "title": {
+      "metro": "Gratulujemy! Masz już cyfrową kartę Nowojorskiej Biblioteki Publicznej.",
+      "temporary": "Gratulujemy! Masz już tymczasową cyfrową kartę biblioteczną Nowojorskiej Biblioteki Publicznej."
+    },
+    "description": {
+      "part1": "Wydrukuj lub zapisz te informacje na przyszłość. W ciągu 24 godzin otrzymasz e-mail z danymi konta.",
+      "part2": "Aby wypożyczyć materiały fizyczne, odwiedź jeden z naszych <a href='http://nypl.org/locations'>oddziałów</a> i okaż ważny <a href='https://www.nypl.org/help/library-card/terms-conditions#eligibility'>dokument tożsamości ze zdjęciem oraz dowód adresu zamieszkania</a> w celu wypełnienia wniosku o kartę fizyczną.",
+      "part3": "Ta karta jest tymczasowa i wygaśnie po 30 dniach. Jeżeli mieszkasz, pracujesz, uczysz się lub płacisz podatki od nieruchomości w stanie Nowy Jork,<a href='https://www.nypl.org/help/library-card/terms-conditions#renew'> dowiedz się</a>, jak zaktualizować kartę. Jeżeli jesteś pracownikiem naukowym i planujesz wizytę później niż za 30 dni, a także w przypadku jakichkolwiek innych pytań, skontaktuj się z nami pod adresem <a href='mailto:gethelp@nypl.org'>gethelp@nypl.org</a>."
+    },
+    "graphic": {
+      "memberName": "Nazwa członka",
+      "password": "Hasło",
+      "expires": "WYGASA"
+    },
+    "nextSteps": {
+      "title": "Zacznij korzystać z Nowojorskiej Biblioteki Publicznej",
+      "explore": {
+        "header": "Poznaj kolekcję e-booków i e-audiobooków",
+        "content": "<a href='https://www.nypl.org/books-music-movies/help'>Czytaj lub słuchaj, gdziekolwiek jesteś</a> korzystając z obszernego zbioru pozycji."
+      },
+      "borrow": {
+        "header": "Wypożycz książki i inne materiały",
+        "content": "<a href='{{loginUrl}}'>Zaloguj się na konto</a> i przejrzyj katalog. Aby wypożyczać materiały fizyczne, odwiedź dowolną <a href='https://www.nypl.org/locations'>placówkę NYPL</a> w celu zweryfikowania swoich danych i uzyskania karty fizycznej."
+      },
+      "updates": {
+        "header": "Otrzymuj aktualności",
+        "content": "<a href='https://www.nypl.org/enews'>Dowiedz się wszystkiego o ofercie Biblioteki.</a>"
+      },
+      "more": {
+        "header": "Więcej informacji",
+        "content": "<a href='https://www.nypl.org/discover-library-card'>Dowiedz się, co możesz robić przy użyciu karty bibliotecznej.</a>"
+      }
+    }
+  },
+  "button": {
+    "start": "Rozpocznij",
+    "edit": "Edytuj",
+    "submit": "Prześlij",
+    "next": "Dalej",
+    "previous": "Wstecz"
+  },
+  "globalErrors": {
+    "title": "Błąd przesyłania formularza",
+    "defaultError": "Podczas przetwarzania wniosku wystąpił błąd. Spróbuj ponownie później."
+  },
+  "apiErrors": {
+    "defaultError": "Wystąpił problem z przesłaniem wniosku."
+  },
+  "ariaLabel": {
+    "librarySuggestions": "Lista propozycji nazw bibliotek",
+    "barcode": "Kod kreskowy do skanowania"
+  }
+}

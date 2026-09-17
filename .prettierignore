@@ -1,0 +1,11 @@
+# Localization
+public/locales/**
+
+# Logs
+*.log
+
+# Ignore Prettier config itself
+.prettierrc
+.prettierrc.*
+.prettierignore
+
