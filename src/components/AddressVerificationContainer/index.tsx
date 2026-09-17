@@ -1,0 +1,325 @@
+import {
+  Box,
+  Form,
+  FormField as DSFormField,
+  FormRow,
+  Radio,
+  RadioGroup,
+  Text,
+} from "@nypl/design-system-react-components";
+import React, { useEffect, useRef, useState } from "react";
+import { useRouter } from "next/router";
+import { useForm } from "react-hook-form";
+
+import useFormDataContext from "../../../src/context/FormDataContext";
+import { Address, AddressResponse } from "../../../src/interfaces";
+import RoutingLinks from "../../../src/components/RoutingLinks.tsx";
+
+import { createQueryParams } from "../../utils/utils";
+
+import { useTranslation } from "next-i18next";
+import { PageSubHeading } from "../PageSubHeading";
+
+const styles = {
+  input: {
+    marginEnd: "20px",
+  },
+};
+
+/**
+ * AddressVerificationContainer
+ * Main page component for the "address review" page.
+ */
+function AddressVerificationContainer() {
+  const [homeAddressSelect, setHomeAddressSelect] = useState("");
+  const [workAddressSelect, setWorkAddressSelect] = useState("");
+  const formRef = useRef<(HTMLDivElement & HTMLFormElement) | null>(null);
+  const {
+    handleSubmit,
+    register,
+    clearErrors,
+    formState: { errors },
+  } = useForm({
+    mode: "onBlur",
+    reValidateMode: "onBlur",
+  });
+  const { state, dispatch } = useFormDataContext();
+  const [isLoading, setIsLoading] = useState(false);
+  // The `addressesResponse` is the value from Service Objects through the NYPL Platform API.
+  const { formValues, addressesResponse } = state;
+  const router = useRouter();
+  // Get the URL query params for `newCard` and `lang`.
+  const queryStr = createQueryParams(router?.query);
+  const { t } = useTranslation("common");
+
+  /**
+   * getAddresses
+   * Returns an array of a single or multiple addresses returned from the API
+   * call to Service Objects. If there was response (could be from no input),
+   * then just return undefined. That's the case for the optional work address.
+   * We want an array so we always render the list of radio buttons, even if
+   * there's only one option.
+   */
+  const getAddresses = (addressObj: AddressResponse): Address[] => {
+    if (!addressObj?.address) {
+      return;
+    }
+    if (addressObj?.addresses?.length) {
+      return addressObj.addresses;
+    }
+    return [addressObj.address];
+  };
+
+  const onChangeHome = (e) => {
+    clearErrors("home-address-select");
+    setHomeAddressSelect(e.target?.value);
+  };
+  const onChangeWork = (e) => {
+    clearErrors("work-address-select");
+    setWorkAddressSelect(e.target?.value);
+  };
+  const homeAddress = getAddresses(addressesResponse?.home);
+  const workAddress = getAddresses(addressesResponse?.work);
+  const homeSelectError = errors?.["home-address-select"]?.message;
+  const workSelectError = errors?.["work-address-select"]?.message;
+
+  useEffect(() => {
+    const syncErrorDescription = (addressType: "home" | "work") => {
+      const fieldName = `${addressType}-address-select`;
+      const errorId = `${addressType}-address-error`;
+      const hasError = !!errors?.[fieldName]?.message;
+      const inputs = formRef.current?.querySelectorAll<HTMLInputElement>(
+        `input[name='${fieldName}']`
+      );
+
+      inputs?.forEach((input) => {
+        if (hasError) {
+          input.setAttribute("aria-describedby", errorId);
+          input.setAttribute("aria-invalid", "true");
+        } else {
+          input.removeAttribute("aria-describedby");
+          input.removeAttribute("aria-invalid");
+        }
+      });
+    };
+
+    syncErrorDescription("home");
+    syncErrorDescription("work");
+  }, [
+    homeSelectError,
+    workSelectError,
+    homeAddress?.length,
+    workAddress?.length,
+  ]);
+
+  /**
+   * extractUpdatedAddressValues
+   * Returns an object with either the home or work address values from a
+   * larger data object. The updated address object has the address type
+   * prepended before its key so it can update the react-hook-form value for
+   * that key property. So a "city" field from the API response will be updated
+   * to "home-city" in order to update the state for the form submission values.
+   */
+  const extractUpdatedAddressValues = (data, addressType) => {
+    const updatedValues = {};
+    if (data) {
+      Object.keys(data).forEach((key) => {
+        updatedValues[`${addressType}-${key}`] = data[key];
+      });
+    }
+    return updatedValues;
+  };
+
+  const submitForm = (formData) => {
+    setIsLoading(true);
+    // These are the values from the radio button inputs if they were rendered.
+    const home = formData["home-address-select"];
+    const work = formData["work-address-select"];
+
+    // These should already be present after RHF validation, but keep this
+    // defensive guard to avoid runtime crashes if malformed data slips through.
+    if (!home) {
+      setIsLoading(false);
+      return;
+    }
+
+    let updatedSelectedHomeAddress = {};
+    let selectedWorkAddress;
+    let updatedSelectedWorkAddress = {};
+
+    // Was the home address updated?
+    // In this case, the home address was vague and the user has to select
+    // between multiple valid addresses returned from Service Objects.
+
+    // Get the index of the object that was selected...
+    const idx = parseInt(home.split("-")[1], 10);
+    // ...and use the address of the selected object.
+    const selectedHomeAddress = homeAddress[idx];
+
+    updatedSelectedHomeAddress = extractUpdatedAddressValues(
+      selectedHomeAddress,
+      "home"
+    );
+
+    // The same idea also follows for the work address, except that it's okay
+    // to *not* have a work address at all. If there isn't a work address,
+    // there's nothing to update so keep moving forward.
+    if (work) {
+      const idx = parseInt(work.split("-")[1], 10);
+      selectedWorkAddress = workAddress[idx];
+    }
+    updatedSelectedWorkAddress = extractUpdatedAddressValues(
+      selectedWorkAddress,
+      "work"
+    );
+
+    // Merge any updates, specifically to the address value, and continue to
+    // the next page.
+    dispatch({
+      type: "SET_FORM_DATA",
+      // Update the existing submitted values with the selected valid address.
+      value: {
+        ...formValues,
+        ...updatedSelectedHomeAddress,
+        ...updatedSelectedWorkAddress,
+      },
+    });
+
+    // Finally, go to the acount page.
+    const nextUrl = `/account?${queryStr}`;
+    setIsLoading(false);
+    router.push(nextUrl);
+  };
+
+  /**
+   * renderMultipleAddresses
+   * Renders a list of alternate valid addresses from an invalid/ambiguous
+   * user submitted address. Each address is rendered inside a label/input
+   * combination so the user can select the right address.
+   */
+  const renderMultipleAddresses = (
+    addresses: Address[],
+    addressType,
+    selectedValue,
+    onChange
+  ) => {
+    if (!addresses?.length) {
+      return null;
+    }
+    const addressesLength = addresses.length;
+    const labelText =
+      addressType === "home"
+        ? t("verifyAddress.homeAddress")
+        : t("verifyAddress.workAddress");
+
+    const selectError = errors?.[`${addressType}-address-select`]?.message;
+    const selectErrorMessage = t("verifyAddress.errorMessage.select");
+    const errorId = `${addressType}-address-error`;
+
+    return (
+      <>
+        <RadioGroup
+          className="address-container"
+          name=""
+          id={addressType.replace(/[^0-9a-zA-Z]/g, "-")}
+          aria-describedby={selectError ? errorId : undefined}
+          labelText={labelText}
+          showLabel={false}
+          sx={{
+            "& .ds-radioGroup-stack": {
+              display: { base: "flex" },
+              flexDirection: { base: "column", sm: "row" },
+            },
+          }}
+          // If there's only one option, it's checked by default.
+          defaultValue={addressesLength === 1 ? `${addressType}-0` : undefined}
+        >
+          {addresses.map((address, idx) => {
+            const selected = `${addressType}-${idx}`;
+            const checked = selected === selectedValue;
+            return (
+              <Radio
+                key={`${addressType}-${idx}`}
+                id={`${addressType}-${idx}`}
+                sx={styles.input}
+                className={`radio-input`}
+                {...register(`${addressType}-address-select`, {
+                  required: selectErrorMessage,
+                  onChange: onChange,
+                })}
+                isChecked={checked}
+                value={selected}
+                labelText={
+                  <Box>
+                    <Box>{address.line1}</Box>
+                    {address.line2 && <Box>{address.line2}</Box>}
+                    <Box>
+                      {address.city}, {address.state} {address.zip}
+                    </Box>
+                  </Box>
+                }
+              />
+            );
+          })}
+        </RadioGroup>
+        <Box m={0}>
+          {selectError && (
+            <Text id={errorId} mt="s" color="ui.error.primary" fontSize="xs">
+              {selectErrorMessage}
+            </Text>
+          )}
+        </Box>
+      </>
+    );
+  };
+
+  return (
+    <Form
+      ref={formRef}
+      id="address-verification-container"
+      onSubmit={handleSubmit(submitForm)}
+      noValidate
+    >
+      <FormRow>
+        <DSFormField gridGap="0">
+          <PageSubHeading id="verify-address-heading" mb="s">
+            {t("verifyAddress.homeAddress")}
+          </PageSubHeading>
+          {renderMultipleAddresses(
+            homeAddress,
+            "home",
+            homeAddressSelect,
+            onChangeHome
+          )}
+
+          {workAddress?.length > 0 && (
+            <Box mt="l">
+              <PageSubHeading id="verify-work-address-heading" mb="s">
+                {t("verifyAddress.workAddress")}
+              </PageSubHeading>
+
+              {renderMultipleAddresses(
+                workAddress,
+                "work",
+                workAddressSelect,
+                onChangeWork
+              )}
+            </Box>
+          )}
+        </DSFormField>
+      </FormRow>
+
+      <FormRow>
+        <DSFormField>
+          <RoutingLinks
+            isDisabled={isLoading}
+            previous={{ url: `/location?${queryStr}` }}
+            next={{ submit: true }}
+          />
+        </DSFormField>
+      </FormRow>
+    </Form>
+  );
+}
+
+export default AddressVerificationContainer;

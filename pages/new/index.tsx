@@ -1,0 +1,108 @@
+/*
+ * You MUST point the browser to http://localhost:3000/library-card/new.
+ * Do NOT point the browser to http://localhost:3000 with no route.
+ * If you do, you will throw an error related to i18next.
+ * */
+import { Box } from "@nypl/design-system-react-components";
+import RoutingLinks from "../../src/components/RoutingLinks.tsx";
+
+import { GetServerSideProps } from "next";
+import { useTranslation } from "next-i18next";
+import { serverSideTranslations } from "next-i18next/serverSideTranslations";
+import LanguageMenu from "../../src/components/LanguageMenu/LanguageMenu";
+import { cookieDomain } from "../../appConfig.js";
+import { PageHeading } from "../../src/components/PageHeading";
+import { Banner } from "../../src/components/Banner";
+
+interface HomePageProps {
+  policyType: any;
+  lang: string;
+}
+
+function HomePage({ policyType, lang }: HomePageProps) {
+  const { t } = useTranslation("common");
+  // If we get a new policy type from the home page, make sure it gets to the
+  // form on the next page. Used for the no-js scenario.
+  const queryParam = policyType ? `&policyType=${policyType}` : "";
+  return (
+    <>
+      <LanguageMenu />
+      <PageHeading mt="l">{t("home.title")}</PageHeading>
+      <Box mb="s">{t("home.description.part1")}</Box>
+      <Box
+        mb="s"
+        dangerouslySetInnerHTML={{
+          __html: t("home.description.part2", {
+            digitalResources: t("home.description.digitalResources"),
+            visitNYPL: t("home.description.visitNYPL"),
+          }),
+        }}
+      />
+      <Box
+        mb="s"
+        dangerouslySetInnerHTML={{
+          __html: t("home.description.part3"),
+        }}
+      />
+      <Box
+        mb="s"
+        dangerouslySetInnerHTML={{
+          __html: t("home.description.part4", {
+            alternateForm: t("home.description.alternateForm"),
+          }),
+        }}
+      />
+      <Box
+        mb="s"
+        dangerouslySetInnerHTML={{
+          __html: t("home.description.part5", {
+            whatYouCanAccess: t("home.description.whatYouCanAccess"),
+          }),
+        }}
+      />
+      <Box
+        mb="s"
+        dangerouslySetInnerHTML={{
+          __html: t("home.description.part6", {
+            termsConditions: t("home.description.termsConditions"),
+            rulesRegulations: t("home.description.rulesRegulations"),
+            privacyPolicy: t("home.description.privacyPolicy"),
+          }),
+        }}
+      />
+      <Banner content={t("home.banner.text")} />
+      <RoutingLinks
+        next={{
+          url: `/personal?newCard=true${queryParam}${
+            lang !== "en" ? `&lang=${lang}` : ""
+          }`,
+          text: t("button.start"),
+        }}
+      />
+    </>
+  );
+}
+
+export const getServerSideProps: GetServerSideProps = async (context) => {
+  const { query } = context;
+
+  const headers = [
+    // reset cookie that would otherwise bump users out of the flow
+    // to succcess page
+    `nyplUserRegistered=false; Max-Age=-1; path=/; domain=${cookieDomain};`,
+  ];
+  context.res.setHeader("Set-Cookie", headers);
+
+  return {
+    props: {
+      lang: query?.lang || "en",
+      // This allows this page to get the proper translations based
+      // on the `lang=...` URL query param. Default to "en".
+      ...(await serverSideTranslations(query?.lang?.toString() || "en", [
+        "common",
+      ])),
+    },
+  };
+};
+
+export default HomePage;

@@ -1,0 +1,179 @@
+import { test, expect } from "@playwright/test";
+import { AddressVerificationPage } from "../../pageobjects/address-verification.page";
+import { PageManager } from "../../pageobjects/page-manager.page";
+import { clickNextButton, fillAddress } from "../../utils/form-helper";
+import {
+  PAGE_ROUTES,
+  SUPPORTED_LANGUAGES,
+  TEST_MULTIMATCH_ADDRESS,
+  TEST_MULTIMATCH_ADDRESS_EAST,
+  TEST_MULTIMATCH_ADDRESS_WEST,
+  TEST_NYC_ADDRESS,
+  TEST_OOS_ADDRESS,
+} from "../../utils/constants";
+
+for (const { lang, name } of SUPPORTED_LANGUAGES) {
+  test.describe(
+    `address verification page in ${name} (${lang})`,
+    { tag: "@regression" },
+    () => {
+      let addressVerificationPage: AddressVerificationPage;
+      let pageManager: PageManager;
+      let appContent: any;
+
+      test.beforeEach(async ({ page }) => {
+        appContent = require(`../../../public/locales/${lang}/common.json`);
+        addressVerificationPage = new AddressVerificationPage(page, appContent);
+        pageManager = new PageManager(page, appContent);
+      });
+
+      test.describe("displays elements", () => {
+        test("displays headings and buttons", async ({ page }) => {
+          await page.goto(PAGE_ROUTES.ADDRESS_VERIFICATION(lang));
+          await expect(addressVerificationPage.mainHeading).toBeVisible();
+          await expect(addressVerificationPage.stepHeading).toBeVisible();
+          await expect(
+            addressVerificationPage.homeAddressHeading
+          ).toBeVisible();
+          await expect(addressVerificationPage.previousButton).toBeVisible();
+          await expect(addressVerificationPage.nextButton).toBeVisible();
+        });
+      });
+
+      test.describe("enters home address and alternate address", () => {
+        test.beforeEach(async ({ page }) => {
+          await page.goto(PAGE_ROUTES.ADDRESS(lang));
+        });
+
+        test("enters valid addresses", async () => {
+          await test.step("enters home address", async () => {
+            await expect(pageManager.addressPage.addressHeading).toBeVisible();
+            await fillAddress(pageManager.addressPage, TEST_OOS_ADDRESS);
+            await clickNextButton(
+              pageManager.addressPage,
+              pageManager.addressPage.nextButton,
+              pageManager.alternateAddressPage.stepHeading
+            );
+          });
+
+          await test.step("enters alternate address", async () => {
+            await expect(
+              pageManager.alternateAddressPage.addressHeading
+            ).toBeVisible();
+            await fillAddress(
+              pageManager.alternateAddressPage,
+              TEST_NYC_ADDRESS
+            );
+            await clickNextButton(
+              pageManager.alternateAddressPage,
+              pageManager.alternateAddressPage.nextButton,
+              pageManager.addressVerificationPage.stepHeading
+            );
+          });
+
+          await test.step("displays home and alternate addresses", async () => {
+            await expect(
+              pageManager.addressVerificationPage.homeAddressHeading
+            ).toBeVisible();
+            await expect(
+              pageManager.addressVerificationPage.getHomeAddressOption(
+                TEST_OOS_ADDRESS.street
+              )
+            ).toBeVisible();
+            await expect(
+              pageManager.addressVerificationPage.alternateAddressHeading
+            ).toBeVisible();
+            await expect(
+              pageManager.addressVerificationPage.getAlternateAddressOption(
+                TEST_NYC_ADDRESS.street
+              )
+            ).toBeVisible();
+          });
+        });
+
+        test("prompts multiple address options", async () => {
+          await test.step("enters home address", async () => {
+            await expect(pageManager.addressPage.addressHeading).toBeVisible();
+            await fillAddress(pageManager.addressPage, TEST_MULTIMATCH_ADDRESS);
+            // skips API check since a 400 from address API is expected for a multimatch address
+            await pageManager.addressPage.nextButton.click();
+          });
+
+          await test.step("enters alternate address", async () => {
+            await expect(
+              pageManager.alternateAddressPage.addressHeading
+            ).toBeVisible();
+            await fillAddress(
+              pageManager.alternateAddressPage,
+              TEST_MULTIMATCH_ADDRESS
+            );
+            // skips API check since a 400 from address API is expected for a multimatch address
+            await pageManager.alternateAddressPage.nextButton.click();
+          });
+
+          await test.step("displays address options", async () => {
+            await expect(
+              pageManager.addressVerificationPage.homeAddressHeading
+            ).toBeVisible();
+            await expect(
+              pageManager.addressVerificationPage.getHomeAddressOption(
+                TEST_MULTIMATCH_ADDRESS_WEST.street
+              )
+            ).toBeVisible();
+            await expect(
+              pageManager.addressVerificationPage.alternateAddressHeading
+            ).toBeVisible();
+            await expect(
+              pageManager.addressVerificationPage.getAlternateAddressOption(
+                TEST_MULTIMATCH_ADDRESS_EAST.street
+              )
+            ).toBeVisible();
+          });
+
+          await test.step("Displays error message when home address is not selected", async () => {
+            await pageManager.addressVerificationPage.nextButton.click();
+            await expect(
+              pageManager.addressVerificationPage.homeAddressError
+            ).toBeVisible();
+          });
+
+          await test.step("selects home address options", async () => {
+            await pageManager.addressVerificationPage
+              .getHomeAddressOption(TEST_MULTIMATCH_ADDRESS_WEST.street)
+              .click();
+
+            await expect(
+              pageManager.addressVerificationPage.getHomeAddressOption(
+                TEST_MULTIMATCH_ADDRESS_WEST.street
+              )
+            ).toBeChecked();
+            await expect(
+              pageManager.addressVerificationPage.homeAddressError
+            ).not.toBeVisible();
+          });
+
+          await test.step("Displays error message when alternate address is not selected", async () => {
+            await pageManager.addressVerificationPage.nextButton.click();
+            await expect(
+              pageManager.addressVerificationPage.alternateAddressError
+            ).toBeVisible();
+          });
+
+          await test.step("selects alternate address options", async () => {
+            await pageManager.addressVerificationPage
+              .getAlternateAddressOption(TEST_MULTIMATCH_ADDRESS_EAST.street)
+              .click();
+            await expect(
+              pageManager.addressVerificationPage.getAlternateAddressOption(
+                TEST_MULTIMATCH_ADDRESS_EAST.street
+              )
+            ).toBeChecked();
+            await expect(
+              pageManager.addressVerificationPage.alternateAddressError
+            ).not.toBeVisible();
+          });
+        });
+      });
+    }
+  );
+}

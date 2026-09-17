@@ -1,0 +1,10 @@
+node_modules
+log
+Dockerfile
+.next
+.dockerignore
+# Don't pass in local credentials to the image!
+.env*
+.elasticbeanstalk
+.certificates
+.eslintcache
