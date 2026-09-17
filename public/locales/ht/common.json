@@ -1,0 +1,199 @@
+{
+  "internationalInstructions": "Yo dwe ranpli seksyon yo ki nan Fòmilè a avèk karaktè Laten sèlman.",
+  "required": "Obligatwa",
+  "banner": {
+    "title": "Aplike pou yon Kat Bibliyotèk sou Entènèt"
+  },
+  "home": {
+    "title": "Aplike pou yon kat bibliyotèk jodi a lè w swiv kèk etap byen fasil",
+    "description": {
+      "part1": "Èske w abite, ap travay, ale lekòl oswa peye enpolokatif nan Eta New York? Pran yon kat bibliyotèk gratis kounye a pou w ka gen aksè a tout sa Bibliyotèk Piblik New York a ap ofri!",
+      "part2": "Kòmanse aplikasyon w lan kounye a pou w ka kòmanse itilize liv elektwonik ak lòt <a href='https://www.nypl.org/help/services/remote-resources'>resous nimerik</a> touswit. Apresa, <a href='https://www.nypl.org/locations'>ale nan nenpòt branch NYPL</a> pou w verifye enfòmasyon w yo epi pou resevwa yon kat fizik NYPL. Kat sa a ba w aksè a plizyè lòt bagay w ap jwenn nan Bibliyotèk la, ki gen ladan, liv fizik, ak pwogram Culture Pass la.",
+      "part3": "Si w soti nan yon lòt eta epi w ap vizite New York, ou ka aplike pou yon kat tanporè apati fòmilè sa a. Anvan vizit ou a, ou kapab mande materyèl fizik epi fè randevou pou rechèch. Pou lòt sèvis Bibliyotèk la ofri yo, ou kapab valide kat ou a an pèsòn nan yon branch NYPL sou 30 jou.",
+      "part4": "Si w soti nan yon lòt peyi, tanpri itilize <a href=\"https://www.nypl.org/help/library-card#international-researchers\">fòmilè altènatif nou an</a> pou vizitè entènasyonal yo. Avèk kat tanporè w la, ou ka mande materyèl epi fè randevou pou rechèch.",
+      "part5": "<a href=\"https://www.nypl.org/library-card\">Aprann plis</a> sou sa ou ka jwenn ak kat bibliyot&egrave;k ou a!",
+      "part6": "L&egrave; ou soum&egrave;t yon aplikasyon, ou konprann epi ou dak&ograve; ak <a href=\"https://nypl.org/help/library-card/terms-conditions\">T&egrave;m ak Kondisyon pou Pwopriyet&egrave; Kat</a> nou yo epi ou dak&ograve; ak <a href=\"https://www.nypl.org/help/about-nypl/legal-notices/policies-and-rules/ht\">Prensip ak R&egrave;gleman</a> nou yo. Pou aprann plis sou kijan Bibliyot&egrave;k la itilize enf&ograve;masyon p&egrave;son&egrave;l, tanpri li <a href=\"https://www.nypl.org/help/about-nypl/legal-notices/privacy-policy/ht\">R&egrave;gleman sou Vi Prive</a> nou an."
+    },
+    "banner": {
+      "text": "Tanpri note byen: Ou dwe gen omwen laj 13 lane pou w aplike anliy. Pou w ka jwenn yon kat bibliyotèk nimerik ak aksè imedya nan resous anliy yo, ou fèt pou w nan eta New York la lè w ap soumèt yon aplikasyon."
+    }
+  },
+  "personal": {
+    "title": "Etap 1 sou 5: Enfomasyon Pèsonèl",
+    "firstName": {
+      "label": "Non"
+    },
+    "lastName": {
+      "label": "Siyati"
+    },
+    "birthdate": {
+      "label": "Dat Nesans",
+      "instruction": "MM/DD/AAAA, ki gen ladann karaktè oblik yo "
+    },
+    "ageGate": "Yes, I am over 13 years old.",
+    "email": {
+      "label": "Imèl",
+      "instruction": "Yon adrès imèl nesesè pou itilize plizyè nan resous nimerik nou yo, tankou liv elektwonik."
+    },
+    "eCommunications": {
+      "labelText": "Wi, mwen ta renmen resevwa enfòmasyon sou pwogram ak sèvis Bibliyotèk Piblik New York (NYPL) ofri yo."
+    },
+    "errorMessage": {
+      "firstName": "Te gen yon pwoblèm. Tanpri antre yon non ki valab.",
+      "lastName": "Te gen yon pwoblèm. Tanpri antre yon siyati ki valab.",
+      "birthdate": "Te gen yon pwoblèm. Tanpri antre yon dat ki valab, MM/DD/AAAA, ki gen ladan karaktè oblik yo.",
+      "ageGate": "Te gen yon pwoblèm. Ou dwe gen omwen laj 13 lane pou w aplike anliy.",
+      "email": "Te gen yon pwoblèm. Tanpri antre yon adrès imèl ki valab."
+    }
+  },
+  "location": {
+    "title": "Etap 2 sou 5: Adrès",
+    "address": {
+      "title": "Adrès Lakay Ou",
+      "description": "Si w abite nan peyi Etazini, tanpri bay adrès lakay ou pi ba a. Si w soti nan yon lòt eta epi w ap vizite New York, ou ka aplike pou yon kat tanporè apati fòmilè sa a. Yon kat tanporè pèmèt ou mande materyèl fizik epi fè randevou pou rechèch anvan vizit ou a. Vizitè entènasyonal yo dwe itilize <a href=\"https://legacycatalog.nypl.org/selfreg/patonsite\">fòmilè altènatif nou an</a>.",
+      "line1": { "label": "Non Ri a" },
+      "line2": { "label": "Apatman / Swit" },
+      "city": { "label": "Vil" },
+      "state": { "label": "Eta", "instruction": "Abrevyasyon ak 2 lèt" },
+      "postalCode": {
+        "label": "Kòd Postal",
+        "instruction": "Kòd postal ki genyen 5 oswa 9 chif."
+      }
+    },
+    "workAddress": {
+      "title": "Etap 2 sou 5: Lòt adrès",
+      "subtitle": "Adrès altènatif (opsyonèl)",
+      "description": {
+        "part1": "Èske w ap travay, ale lekòl oswa peye enpolokatif nan Eta New York? Menm si ou pa abite nan New York, ou ka elijib kanmèm pou yon kat bibliyotèk.",
+        "part2": "Si ou travay oswa ou ale lekòl nan NYC, tanpri bay enfòmasyon yo mande yo.",
+        "part3": "Tanpri bay adrès kote w travay la, kote w ale lekòl oswa kote w peye enpolokatif nan Eta New York la? Si okenn nan sa yo pa konsène w, klike sou pwochen."
+      }
+    },
+    "errorMessage": {
+      "line1": "Te gen yon pwoblèm. Tanpri antre yon non ri ki valab.",
+      "city": "Te gen yon pwoblèm. Tanpri antre non yon vil ki valab.",
+      "state": "Te gen yon pwoblèm. Tanpri antre fòm abrevyasyon 2 karaktè yon eta.",
+      "zip": "Te gen yon pwoblèm. Tanpri antre yon kòd postal ki genyen 5 oswa 9 chif."
+    }
+  },
+  "verifyAddress": {
+    "title": "Etap 3 sou 5: Verifikasyon Adrès",
+    "description": "Tanpri verifye detay adrès ou. Si ou bezwen fè chanjman, klike sou 'Avan'.",
+    "homeAddress": "Adrès Lakay Ou",
+    "workAddress": "Lòt adrès",
+    "errorMessage": {
+      "select": "Te gen yon pwoblèm. Tanpri chwazi adrès ki kòrèk la."
+    }
+  },
+  "account": {
+    "title": "Etap 4 sou 5: Pèsonalize Kont Ou",
+    "description": "Kreye yon non itilizatè ak yon nimewo idantifikasyon pèsonèl (Personal Identification Number, PIN) pou w ka konekte w ak jere kont ou oswa pou jwenn aksè ak plizyè nan resous nimerik nou yo. Non itilizatè w la dwe inik.",
+    "username": {
+      "label": "Non Itilizatè",
+      "instruction": "5 a 25 karaktè alfanimerik. Karaktè espesyal pa otorize.",
+      "checkButton": "Tcheke si non itilizatè a disponib"
+    },
+    "password": {
+      "label": "Modpas",
+      "instruction": "Tanpri kreye yon modpas solid ki gen ant 8 ak 32 karaktè lè w sèvi ak karaktè majiskil oswa miniskil (a-z, A-Z), nimewo (0-9), ak/oswa karaktè espesyal ki limite sèlman ak sa yo: . ~ ! ? @ # $ % ^ &amp; * ( ) <span>Modpas yo pa dwe gen modèl ki komen, pa egzanp: yon karaktè ki repete twa fwa oswa plis (aaaatf54), oswa yon modèl k ap repete (abcabcabc). </span>"
+    },
+    "verifyPassword": {
+      "label": "Verifye Modpas ",
+      "instruction": "8 a 32 karaktè"
+    },
+    "showPassword": "Montre modpas la",
+    "library": {
+      "selectLibrary": "Chwazi yon bibliyotèk adomisil:",
+      "placeholder": "Tape non yon bibliyotèk, tankou Parkchester Library",
+      "title": "Bibliyotèk Adomisil",
+      "description": {
+        "part1": "Chwazi yon bibliyotèk adomisil ap ede nou asire nou ke w jwenn tout sa w bezwen nan sikisal ki pi bon pou ou a.",
+        "part2": "Tanpri seleksyone yon <a href='https://www.nypl.org/locations'>branch NYPL</a> apati meni dewoulan ki pi ba a kòm bibliyotèk prensipal ou. Si w pa gen yon bibliyotèk prensipal, tanpri seleksyone “Virtual.” Ou kapab mete enfòmasyon sa a ajou nenpòt lè apati paramèt kont ou an.",
+        "part3": "Pou w prete atik fizik, ou dwe prezante w nan yon branch NYPL pou verifye enfòmasyon w epi pou w resevwa yon kat fizik."
+      }
+    },
+    "termsAndCondition": {
+      "label": "Wi, mwen dakò ak tèm ak kondisyon yo.",
+      "text": "Lè ou soumèt yon aplikasyon, ou konprann epi ou dakò ak <a href='https://www.nypl.org/help/library-card/terms-conditions'>Tèm ak Kondisyon pou moun ki gen kat</a> nou yo epi ou dakò ak <a href='https://www.nypl.org/help/about-nypl/legal-notices/rules-and-regulations'>Règ ak Règleman</a> nou yo. Pou aprann plis sou itilizasyon enfòmasyon pèsonèl Bibliyotèk la, tanpri li <a href='https://www.nypl.org/help/about-nypl/legal-notices/privacy-policy'>Règleman sou Vi Prive</a> nou an."
+    },
+    "errorMessage": {
+      "username": "Te gen yon pwoblèm. Non itilizatè a dwe genyen ant 5-25 karaktè alfanimerik.",
+      "password": "Te gen yon pwoblèm. Modpas ou a dwe gen ant 8 ak 32 karaktè lè w sèvi ak karaktè majiskil oswa miniskil (a-z, A-Z), nimewo (0-9), ak/oswa karaktè espesyal ki limite sèlman ak sa yo: . ~ ! ? @ # $ % ^ &amp; * ( ) <span>Modpas yo pa dwe gen modèl ki komen, pa egzanp: yon karaktè ki repete twa fwa oswa plis (aaaatf54), oswa yon modèl k ap repete (abcabcabc). </span>",
+      "verifyPassword": "Te gen yon pwoblèm. De modpas yo pa koresponn.",
+      "acceptTerms": "Te gen yon pwoblèm. Ou dwe tcheke seksyon Tèm ak Kondisyon yo.",
+      "homeLibraryCode": "Te gen yon pwoblèm. Tanpri seleksyone yon bibliyotèk prensipal."
+    }
+  },
+  "review": {
+    "title": "Etap 5 sou 5: Konfime Enfòmasyon W",
+    "description": "Asire w ke tout enfòmasyon ou te antre yo kòrèk. Si sa nesesè, ou ka toujou fè chanjman anvan w soumèt aplikasyon w lan.",
+    "section": {
+      "personal": "Enfomasyon Pèsonèl",
+      "address": {
+        "label": "Adrès",
+        "location": "kote",
+        "home": "lakay ou",
+        "work": "Adrès travay la"
+      },
+      "homeLibrary": "Bibliyotèk Adomisil"
+    },
+    "createAccount": "Kreye kont ou",
+    "receiveNewsletter": "Resevwa enfòmasyon sou pwogram ak sèvis NYPL",
+    "yes": "Wi",
+    "no": "Non",
+    "nextStep": "Apre ou fin soumèt aplikasyon w lan, w ap wè yon paj konfimasyon ki genyen enfòmasyon sou kont ou an ladan, epi w ap kapab konekte w ak mande liv ak materyèl."
+  },
+  "confirmation": {
+    "title": {
+      "metro":"Felisitasyon! Kounye a, ou gen yon kat Bibliyotèk Piblik New York.",
+      "temporary":"Felisitasyon! Ou gen yon kat nimerik tanporè Bibliyotèk Piblik New York kounye a."
+    },
+    "description": {
+      "part1": "Enprime oswa sovgade enfòmasyon sa yo pou dosye w. Nan 24 èdtan, ou pral resevwa yon imèl ak tout detay kont ou an.",
+      "part2": "Pou prete materyèl fizik, tanpri ale nan youn nan l <a href='http://nypl.org/locations'>lokal nou yo</a> ak yon <a href='https://www.nypl.org/help/library-card/terms-conditions#eligibility'>pyès idantite ki gen foto epi ki valab ak prèv adrès kote ou rete a</a> pou ranpli aplikasyon an pou jwenn yon kat fizik",
+      "part3": "Se yon kat tanporè li ye epi l ap ekspire nan 30 jou. Si w abite, ap travay, ale lekòl oswa peye enpolokatif nan Eta New York, <a href=\"https://www.nypl.org/help/library-card/terms-conditions#renew\">aprann plis</a> sou fason pou w mete kat ou a ajou. Si w se yon chèchè k ap planifye yon vizit byento nan plis pase 30 jou apati jodi a, e si w gen nenpòt lòt kesyon, kontakte <a href='mailto:gethelp@nypl.org'>gethelp@nypl.org</a>."
+    },
+    "graphic": {
+      "memberName": "Non manm",
+      "password": "Modpas",
+      "expires": "EKSPIRE"
+    },
+    "nextSteps": {
+      "title": "Demare ak Bibliyotèk Piblik New York la",
+      "explore": {
+        "header": "Eksplore Liv Elektwonik ak Liv Odyo Elektwonik",
+        "content": "<a href='https://www.nypl.org/books-music-movies/help'>Li oswa Koute kèlkeswa kote w ye a</a> etan w gen aksè a yon gwo seleksyon tit."
+      },
+      "borrow": {
+        "header": "Prete Liv ak Plis Bagay Toujou",
+        "content": "<a href='{{loginUrl}}'> Konekte w sou kont ou</a> epi eksplore katalòg la. Pou w mande atik fizik, prezante w nan nenpòt <a href=\"https://www.nypl.org/locations\">branch NYPL</a> pou verifye enfòmasyon w yo epi resevwa yon kat fizik."
+      },
+      "updates": {
+        "header": "Jwenn Mizajou yo",
+        "content": "<a href='https://www.nypl.org/enews'>Dekouvri tout sa Bibliyotèk la kapab ofri w.</a>"
+      },
+      "more": {
+        "header": "Jwenn plis enfòmasyon.",
+        "content": "<a href='https://www.nypl.org/discover-library-card'>Dekouvri tout bagay ou kapab fè ak kat Bibliyotèk ou an.</a>"
+      }
+    }
+  },
+  "button": {
+    "start": "Demare",
+    "edit": "Chanjman",
+    "submit": "Soumèt",
+    "next": "Suivan",
+    "previous": "Avan"
+  },
+  "globalErrors": {
+    "title": "Erè soumisyon fòmilè",
+    "defaultError": "Te gen yon erè nan tretman soumisyon w lan. Tanpri eseye ankò pita."
+  },
+  "apiErrors": {
+    "defaultError": "Te gen yon pwoblèm ak soumisyon an"
+  },
+  "ariaLabel": {
+    "librarySuggestions": "Etabli lis tout sigjesyon pou non bibliyotèk yo",
+    "barcode": "Kòdbar eskann la kapab rekonèt9"
+  }
+}

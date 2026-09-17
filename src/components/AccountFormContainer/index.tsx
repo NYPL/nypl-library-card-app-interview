@@ -1,0 +1,67 @@
+import {
+  Form,
+  FormField as DSFormField,
+  FormRow,
+} from "@nypl/design-system-react-components";
+import React, { useState } from "react";
+import { useFormContext } from "react-hook-form";
+import { useRouter } from "next/router";
+
+import useFormDataContext from "../../context/FormDataContext";
+import RoutingLinks from "../RoutingLinks.tsx";
+import AccountFormFields from "../AccountFormFields";
+import AcceptTermsFormFields from "../AcceptTermsFormFields";
+
+import { createQueryParams } from "../../utils/utils";
+
+const AccountFormContainer = ({ csrfToken }) => {
+  const { state, dispatch } = useFormDataContext();
+  const { formValues } = state;
+  const [isLoading, setIsLoading] = useState(false);
+  const router = useRouter();
+  // Specific functions and object from react-hook-form.
+  const { handleSubmit } = useFormContext();
+  // Get the URL query params for `newCard` and `lang`.
+  const queryStr = createQueryParams(router?.query);
+
+  /**
+   * submitForm
+   * @param formData - data object returned from react-hook-form
+   */
+  const submitForm = async (formData, e) => {
+    e.preventDefault();
+    setIsLoading(true);
+    // Set the global form state...
+    dispatch({
+      type: "SET_FORM_DATA",
+      value: { ...formValues, ...formData },
+    });
+
+    const nextUrl = `/review?${queryStr}`;
+    setIsLoading(false);
+    await router.push(nextUrl);
+  };
+
+  return (
+    <Form
+      id="account-form-container"
+      onSubmit={handleSubmit(submitForm)}
+      noValidate
+    >
+      <AccountFormFields csrfToken={csrfToken} id="account-form-container" />
+      <AcceptTermsFormFields />
+
+      <FormRow>
+        <DSFormField>
+          <RoutingLinks
+            isDisabled={isLoading}
+            previous={{ url: `/address-verification?${queryStr}` }}
+            next={{ submit: true }}
+          />
+        </DSFormField>
+      </FormRow>
+    </Form>
+  );
+};
+
+export default AccountFormContainer;

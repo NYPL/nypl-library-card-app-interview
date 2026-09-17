@@ -1,0 +1,172 @@
+import { useEffect } from "react";
+import "@nypl/design-system-react-components/dist/styles.css";
+import "../src/styles/main.scss";
+import Head from "next/head";
+import { useForm, FormProvider } from "react-hook-form";
+import {
+  FormDataContextProvider,
+  formInitialState,
+} from "../src/context/FormDataContext";
+import * as appConfig from "../appConfig";
+import { FormInputData } from "../src/interfaces";
+import ApplicationContainer from "../src/components/ApplicationContainer";
+import { getPageTitles } from "../src/utils/utils";
+import { DSProvider } from "@nypl/design-system-react-components";
+import { appWithTranslation, useTranslation } from "next-i18next";
+import { useRouter } from "next/router";
+import { GetServerSideProps } from "next";
+import Script from "next/script";
+import { theme } from "../src/theme";
+import pkg from "../package.json";
+import ErrorBoundary from "../src/components/ErrorBoundary";
+
+interface MyAppProps {
+  Component: any;
+  pageProps: any;
+}
+
+console.info("App Version: ", pkg.version);
+
+function MyApp({ Component, pageProps }: MyAppProps) {
+  const router = useRouter();
+  const formInitialStateCopy = { ...formInitialState };
+  const formMethods = useForm<FormInputData>({
+    mode: "onBlur",
+    reValidateMode: "onBlur",
+  });
+  const { favIconPath, appTitle } = appConfig;
+
+  // Setting the "lang" and the "dir" attribute
+  const { i18n } = useTranslation("common");
+  useEffect(() => {
+    if (!i18n || !i18n.dir) return;
+    let lang = router.query.lang || "en";
+    if (Array.isArray(lang) && lang.length > 0) {
+      lang = lang[0];
+    }
+
+    if (lang === "zhcn") {
+      lang = "zh-cn";
+    }
+    if (document.getElementById("__next"))
+      document.getElementById("__next").dir = `${i18n.dir()}`;
+    document.documentElement.lang = `${lang}`;
+  }, [i18n]);
+
+  // Update the form values state with the initial url query params in
+  // the app's store state.
+  formInitialStateCopy.formValues = {
+    ...formInitialStateCopy.formValues,
+    ...router.query,
+  };
+  const initState = { ...formInitialStateCopy };
+  const pageTitles = getPageTitles();
+  const isErrorPage = ["/404", "/500"].includes(router.pathname);
+
+  return (
+    <>
+      <Head>
+        <meta charSet="utf-8" />
+        <meta httpEquiv="x-ua-compatible" content="ie=edge" />
+        <title>{`${appTitle} | NYPL`}</title>
+        <link rel="icon" type="image/png" href={favIconPath} />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <meta
+          name="description"
+          content="With a library card you get free access to resources and services across all New York Public Library locations."
+        />
+        <meta
+          name="keywords"
+          content="NYPL, The New York Public Library, Manhattan, Bronx, Staten Island"
+        />
+        <meta
+          name="rights"
+          content={`© ${new Date().getFullYear()} The New York Public Library`}
+        />
+        <meta
+          property="og:title"
+          content="Apply for a library card from NYPL"
+        />
+        <meta
+          property="og:description"
+          content="Get free access to resources and services with a New York Public Library card."
+        />
+        <meta property="og:type" content="website" />
+        <meta
+          property="og:image"
+          content="https://www.nypl.org/sites/default/files/library_card-1200x800.jpg"
+        />
+        <meta property="og:site_name" content="The New York Public Library" />
+        <meta
+          property="og:url"
+          content="https://www.nypl.org/library-card/new"
+        />
+        <meta
+          name="twitter:title"
+          content="Apply for a library card from NYPL"
+        />
+        <meta
+          name="twitter:description"
+          content="Get free access to resources and services with a New York Public Library card."
+        />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:site" content="@nypl" />
+        <meta name="twitter:creator" content="@nypl" />
+        <meta
+          name="twitter:image"
+          content="https://www.nypl.org/sites/default/files/library_card-1200x800.jpg"
+        />
+        {/* <!-- Google Analytics --> */}
+        {/* We can't directly put the script into this component because React
+            doesn't allow it, so we must add it through the
+            `dangerouslySetInnerHTML` prop.
+        */}
+        {/* <!-- End Google Analytics --> */}
+      </Head>
+      <Script
+        id="google-data-layer"
+        dangerouslySetInnerHTML={{
+          __html: `
+            (function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+            new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+            j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.crossOrigin='anonymous';j.src=
+            'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+            })(window,document,'script','dataLayer','GTM-RKWC');
+          `,
+        }}
+      />
+      <div translate="no" className="notranslate">
+        <DSProvider theme={theme}>
+          <FormProvider {...formMethods}>
+            <FormDataContextProvider initState={initState}>
+              <ErrorBoundary reset={router.asPath}>
+                {isErrorPage ? (
+                  <Component {...pageProps} />
+                ) : (
+                  <ApplicationContainer>
+                    <Component
+                      {...pageProps}
+                      pageTitles={pageTitles}
+                      policyType={router.query.policyType}
+                    />
+                  </ApplicationContainer>
+                )}
+              </ErrorBoundary>
+            </FormDataContextProvider>
+          </FormProvider>
+        </DSProvider>
+      </div>
+    </>
+  );
+}
+
+// `getServerSideProps` required for the `appWithTranslation`
+// HOC for language translations.
+export const getServerSideProps: GetServerSideProps = async (context) => {
+  return {
+    props: { query: context.req },
+  };
+};
+
+// Allows the entire application to work with the `next-i18next` package.
+export default appWithTranslation(MyApp as any);

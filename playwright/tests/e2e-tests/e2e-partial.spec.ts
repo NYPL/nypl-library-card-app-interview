@@ -1,0 +1,378 @@
+import { test, expect } from "@playwright/test";
+import { PageManager } from "../../pageobjects/page-manager.page";
+import {
+  clearContext,
+  clickNextButton,
+  fillAccountInfo,
+  fillAddress,
+  fillPersonalInfo,
+  getLocaleContent,
+  waitForErrorOrHeading,
+  getErrorMessages,
+  clickCheckbox,
+} from "../../utils/form-helper";
+import {
+  createTestAccount,
+  PAGE_ROUTES,
+  SUPPORTED_LANGUAGES,
+  TEST_NYC_ADDRESS,
+  TEST_OOS_ADDRESS,
+  TEST_PATRON,
+  IP,
+} from "../../utils/constants";
+
+for (const { lang, name } of SUPPORTED_LANGUAGES) {
+  const TEST_ACCOUNT = createTestAccount();
+  const TEST_EDITED_ACCOUNT = createTestAccount();
+  test.describe.serial(
+    `E2E: Edits patron information in ${name} (${lang})`,
+    { tag: "@e2e" },
+    () => {
+      let pageManager: PageManager;
+      let appContent: any;
+
+      test.beforeEach(async ({ page, context }) => {
+        await clearContext(page, context);
+        await page.setExtraHTTPHeaders({
+          "x-client-ip": IP.NYC_IP,
+          "x-forwarded-for": IP.NYC_IP,
+          "accept-language": `${lang},en-US;q=0.9`,
+        });
+
+        appContent = getLocaleContent(lang);
+        pageManager = new PageManager(page, appContent);
+      });
+
+      test("displays error when address is too long", async ({ page }) => {
+        const invalidStreet = "A".repeat(100);
+
+        await test.step("enters invalid home address", async () => {
+          await page.goto(PAGE_ROUTES.ADDRESS(lang));
+          await expect(pageManager.addressPage.stepHeading).toBeVisible();
+          await fillAddress(pageManager.addressPage, {
+            street: invalidStreet,
+            apartmentSuite: "1",
+            city: "City",
+            state: "NY",
+            postalCode: "12345",
+          });
+          // skips API check since a 400 from address API is expected for an invalid address
+          await expect(pageManager.addressPage.nextButton).toBeVisible();
+          await pageManager.addressPage.nextButton.click();
+          await waitForErrorOrHeading(
+            getErrorMessages(pageManager.addressPage),
+            pageManager.alternateAddressPage.stepHeading
+          );
+        });
+
+        await test.step("skips alternate address", async () => {
+          await clickNextButton(
+            pageManager.alternateAddressPage,
+            pageManager.alternateAddressPage.nextButton,
+            pageManager.addressVerificationPage.stepHeading
+          );
+        });
+
+        await test.step("verifies home address", async () => {
+          await expect(
+            pageManager.addressVerificationPage.stepHeading
+          ).toBeVisible();
+          await pageManager.addressVerificationPage
+            .getHomeAddressOption(invalidStreet)
+            .click();
+          await clickNextButton(
+            pageManager.addressVerificationPage,
+            pageManager.addressVerificationPage.nextButton,
+            pageManager.accountPage.stepHeading
+          );
+        });
+
+        await test.step("enters account information", async () => {
+          await expect(pageManager.accountPage.stepHeading).toBeVisible();
+          await fillAccountInfo(pageManager.accountPage, TEST_ACCOUNT);
+          await clickNextButton(
+            pageManager.accountPage,
+            pageManager.accountPage.nextButton,
+            pageManager.reviewPage.stepHeading
+          );
+        });
+
+        await test.step("displays error on review page", async () => {
+          await expect(pageManager.reviewPage.stepHeading).toBeVisible();
+          await pageManager.reviewPage.submitButton.click();
+          await expect(pageManager.reviewPage.streetAddressError).toBeVisible();
+        });
+      });
+
+      test("displays updated account info after editing addresses", async ({
+        page,
+      }) => {
+        await test.step("enters account information", async () => {
+          await page.goto(PAGE_ROUTES.ACCOUNT(lang));
+          await expect(pageManager.accountPage.stepHeading).toBeVisible();
+          await fillAccountInfo(pageManager.accountPage, TEST_ACCOUNT);
+          await clickNextButton(
+            pageManager.accountPage,
+            pageManager.accountPage.nextButton,
+            pageManager.reviewPage.stepHeading
+          );
+        });
+
+        await test.step("edits address from review page", async () => {
+          await expect(pageManager.reviewPage.stepHeading).toBeVisible();
+          await pageManager.reviewPage.editAddressButton.click();
+        });
+
+        await test.step("enters home address", async () => {
+          await expect(pageManager.addressPage.stepHeading).toBeVisible();
+          await fillAddress(pageManager.addressPage, TEST_NYC_ADDRESS);
+          await clickNextButton(
+            pageManager.addressPage,
+            pageManager.addressPage.nextButton,
+            pageManager.addressVerificationPage.stepHeading
+          );
+        });
+
+        await test.step("verifies home address", async () => {
+          await expect(
+            pageManager.addressVerificationPage.stepHeading
+          ).toBeVisible();
+          await pageManager.addressVerificationPage
+            .getHomeAddressOption(TEST_NYC_ADDRESS.street)
+            .click();
+          await clickNextButton(
+            pageManager.addressVerificationPage,
+            pageManager.addressVerificationPage.nextButton,
+            pageManager.accountPage.stepHeading
+          );
+        });
+
+        await test.step("edits account information", async () => {
+          await expect(pageManager.accountPage.stepHeading).toBeVisible();
+          await fillAccountInfo(pageManager.accountPage, TEST_EDITED_ACCOUNT);
+          await clickNextButton(
+            pageManager.accountPage,
+            pageManager.accountPage.nextButton,
+            pageManager.reviewPage.stepHeading
+          );
+        });
+
+        await test.step("displays updated account info on review page", async () => {
+          await expect(pageManager.reviewPage.stepHeading).toBeVisible();
+          await expect(
+            pageManager.reviewPage.getText(TEST_EDITED_ACCOUNT.username)
+          ).toBeVisible();
+          await clickCheckbox(
+            pageManager.reviewPage.showPasswordCheckboxLabel,
+            pageManager.reviewPage.showPasswordCheckbox
+          );
+          await expect(
+            pageManager.reviewPage.getText(TEST_EDITED_ACCOUNT.password)
+          ).toBeVisible();
+          await expect(
+            pageManager.reviewPage.getText(TEST_EDITED_ACCOUNT.homeLibrary)
+          ).toBeVisible();
+        });
+      });
+
+      test("retains user-entered info after clicking breadcrumb", async ({
+        page,
+      }) => {
+        await test.step("enters personal information", async () => {
+          await page.goto(PAGE_ROUTES.PERSONAL(lang));
+          await expect(pageManager.personalPage.stepHeading).toBeVisible();
+          await fillPersonalInfo(pageManager.personalPage, TEST_PATRON);
+          await clickCheckbox(
+            pageManager.personalPage.receiveInfoCheckboxLabel,
+            pageManager.personalPage.receiveInfoCheckbox
+          );
+          await expect(
+            pageManager.personalPage.receiveInfoCheckbox
+          ).not.toBeChecked();
+          await clickNextButton(
+            pageManager.personalPage,
+            pageManager.personalPage.nextButton,
+            pageManager.addressPage.stepHeading
+          );
+        });
+
+        await test.step("enters home address", async () => {
+          await expect(pageManager.addressPage.stepHeading).toBeVisible();
+          await fillAddress(pageManager.addressPage, TEST_OOS_ADDRESS);
+          await clickNextButton(
+            pageManager.addressPage,
+            pageManager.addressPage.nextButton,
+            pageManager.alternateAddressPage.stepHeading
+          );
+        });
+
+        await test.step("enters alternate address", async () => {
+          await expect(
+            pageManager.alternateAddressPage.stepHeading
+          ).toBeVisible();
+          await fillAddress(pageManager.alternateAddressPage, TEST_NYC_ADDRESS);
+          await clickNextButton(
+            pageManager.alternateAddressPage,
+            pageManager.alternateAddressPage.nextButton,
+            pageManager.addressVerificationPage.stepHeading
+          );
+        });
+
+        await test.step("verifies home and alternate addresses", async () => {
+          await expect(
+            pageManager.addressVerificationPage.stepHeading
+          ).toBeVisible();
+          await pageManager.addressVerificationPage
+            .getHomeAddressOption(TEST_OOS_ADDRESS.street)
+            .click();
+          await pageManager.addressVerificationPage
+            .getAlternateAddressOption(TEST_NYC_ADDRESS.street)
+            .click();
+          await clickNextButton(
+            pageManager.addressVerificationPage,
+            pageManager.addressVerificationPage.nextButton,
+            pageManager.accountPage.stepHeading
+          );
+        });
+
+        await test.step("enters account information", async () => {
+          await expect(pageManager.accountPage.stepHeading).toBeVisible();
+          await fillAccountInfo(pageManager.accountPage, TEST_ACCOUNT);
+          await clickNextButton(
+            pageManager.accountPage,
+            pageManager.accountPage.nextButton,
+            pageManager.reviewPage.stepHeading
+          );
+        });
+
+        await test.step("displays review page and verifies receive info checkbox is unchecked", async () => {
+          await expect(pageManager.reviewPage.stepHeading).toBeVisible();
+          await pageManager.reviewPage.editPersonalInfoButton.click();
+          await expect(
+            pageManager.reviewPage.receiveInfoCheckbox
+          ).not.toBeChecked();
+        });
+
+        await test.step("clicks breadcrumb and displays landing page", async () => {
+          await pageManager.globalComponents.getLibraryCardBreadcrumb.click();
+          await expect(pageManager.landingPage.applyHeading).toBeVisible();
+          await pageManager.landingPage.getStartedButton.click();
+        });
+
+        await test.step("retains info on personal information page", async () => {
+          await expect(pageManager.personalPage.stepHeading).toBeVisible();
+          await expect(pageManager.personalPage.firstNameInput).toHaveValue(
+            TEST_PATRON.firstName
+          );
+          await expect(pageManager.personalPage.lastNameInput).toHaveValue(
+            TEST_PATRON.lastName
+          );
+          await expect(pageManager.personalPage.dateOfBirthInput).toHaveValue(
+            TEST_PATRON.dateOfBirth
+          );
+          await expect(pageManager.personalPage.emailInput).toHaveValue(
+            TEST_PATRON.email
+          );
+          await expect(
+            pageManager.personalPage.receiveInfoCheckbox
+          ).not.toBeChecked();
+          await clickNextButton(
+            pageManager.personalPage,
+            pageManager.personalPage.nextButton,
+            pageManager.addressPage.stepHeading
+          );
+        });
+
+        await test.step("retains info on address page", async () => {
+          await expect(pageManager.addressPage.stepHeading).toBeVisible();
+          await expect(pageManager.addressPage.streetAddressInput).toHaveValue(
+            TEST_OOS_ADDRESS.street
+          );
+          await expect(pageManager.addressPage.apartmentSuiteInput).toHaveValue(
+            TEST_OOS_ADDRESS.apartmentSuite
+          );
+          await expect(pageManager.addressPage.cityInput).toHaveValue(
+            TEST_OOS_ADDRESS.city
+          );
+          await expect(pageManager.addressPage.stateInput).toHaveValue(
+            TEST_OOS_ADDRESS.state
+          );
+          await expect(pageManager.addressPage.postalCodeInput).toHaveValue(
+            TEST_OOS_ADDRESS.postalCode
+          );
+          await clickNextButton(
+            pageManager.addressPage,
+            pageManager.addressPage.nextButton,
+            pageManager.alternateAddressPage.stepHeading
+          );
+        });
+
+        await test.step("retains info on alternate address page", async () => {
+          await expect(
+            pageManager.alternateAddressPage.stepHeading
+          ).toBeVisible();
+          await expect(
+            pageManager.alternateAddressPage.streetAddressInput
+          ).toHaveValue(TEST_NYC_ADDRESS.street);
+          await expect(
+            pageManager.alternateAddressPage.apartmentSuiteInput
+          ).toHaveValue(TEST_NYC_ADDRESS.apartmentSuite);
+          await expect(pageManager.alternateAddressPage.cityInput).toHaveValue(
+            TEST_NYC_ADDRESS.city
+          );
+          await expect(pageManager.alternateAddressPage.stateInput).toHaveValue(
+            TEST_NYC_ADDRESS.state
+          );
+          await expect(
+            pageManager.alternateAddressPage.postalCodeInput
+          ).toHaveValue(TEST_NYC_ADDRESS.postalCode);
+          await clickNextButton(
+            pageManager.alternateAddressPage,
+            pageManager.alternateAddressPage.nextButton,
+            pageManager.addressVerificationPage.stepHeading
+          );
+        });
+
+        await test.step("retains info on address verification page", async () => {
+          await expect(
+            pageManager.addressVerificationPage.stepHeading
+          ).toBeVisible();
+          await expect(
+            pageManager.addressVerificationPage.getHomeAddressOption(
+              TEST_OOS_ADDRESS.street
+            )
+          ).toBeChecked();
+          await expect(
+            pageManager.addressVerificationPage.getAlternateAddressOption(
+              TEST_NYC_ADDRESS.street
+            )
+          ).toBeChecked();
+          await clickNextButton(
+            pageManager.addressVerificationPage,
+            pageManager.addressVerificationPage.nextButton,
+            pageManager.accountPage.stepHeading
+          );
+        });
+
+        await test.step("retains info on account page", async () => {
+          await expect(pageManager.accountPage.stepHeading).toBeVisible();
+          await expect(pageManager.accountPage.usernameInput).toHaveValue(
+            TEST_ACCOUNT.username
+          );
+          await expect(pageManager.accountPage.passwordInput).toHaveValue(
+            TEST_ACCOUNT.password
+          );
+          await expect(pageManager.accountPage.verifyPasswordInput).toHaveValue(
+            TEST_ACCOUNT.password
+          );
+          await expect(pageManager.accountPage.selectHomeLibrary).toHaveValue(
+            TEST_ACCOUNT.homeLibraryCode
+          );
+          await expect(
+            pageManager.accountPage.acceptTermsCheckbox
+          ).toBeChecked();
+        });
+      });
+    }
+  );
+}
